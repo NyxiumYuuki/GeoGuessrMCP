@@ -1,17 +1,53 @@
-"""Configuration management."""
+"""Configuration management for GeoGuessr MCP Server."""
 
 import os
-from dataclasses import dataclass
+from dataclasses import dataclass, field
+from typing import Optional
 
 
 @dataclass
 class Settings:
-    HOST: str = os.getenv("MCP_HOST", "0.0.0.0")
-    PORT: int = int(os.getenv("MCP_PORT", "8000"))
-    TRANSPORT: str = os.getenv("MCP_TRANSPORT", "streamable-http")
-    GEOGUESSR_BASE_URL: str = "https://www.geoguessr.com/api"
+    """Application settings loaded from environment variables."""
+
+    # MCP Server Configuration
+    HOST: str = field(default_factory=lambda: os.getenv("MCP_HOST", "0.0.0.0"))
+    PORT: int = field(default_factory=lambda: int(os.getenv("MCP_PORT", "8000")))
+    TRANSPORT: str = field(default_factory=lambda: os.getenv("MCP_TRANSPORT", "streamable-http"))
+
+    # GeoGuessr API Configuration
+    GEOGUESSR_DOMAIN_NAME: str = "geoguessr.com"
+    GEOGUESSR_API_URL: str = "https://www.geoguessr.com/api"
     GAME_SERVER_URL: str = "https://game-server.geoguessr.com/api"
-    DEFAULT_NCFA_COOKIE: str | None = os.getenv("GEOGUESSR_NCFA_COOKIE")
+    DEFAULT_NCFA_COOKIE: Optional[str] = field(
+        default_factory=lambda: os.getenv("GEOGUESSR_NCFA_COOKIE")
+    )
+
+    # API Monitoring Configuration
+    MONITORING_ENABLED: bool = field(
+        default_factory=lambda: os.getenv("MONITORING_ENABLED", "true").lower() == "true"
+    )
+    MONITORING_INTERVAL_HOURS: int = field(
+        default_factory=lambda: int(os.getenv("MONITORING_INTERVAL_HOURS", "24"))
+    )
+    SCHEMA_CACHE_DIR: str = field(
+        default_factory=lambda: os.getenv("SCHEMA_CACHE_DIR", "/app/data/schemas")
+    )
+
+    # Logging Configuration
+    LOG_LEVEL: str = field(default_factory=lambda: os.getenv("LOG_LEVEL", "INFO"))
+
+    # Request Configuration
+    REQUEST_TIMEOUT: float = field(
+        default_factory=lambda: float(os.getenv("REQUEST_TIMEOUT", "30.0"))
+    )
+    MAX_RETRIES: int = field(default_factory=lambda: int(os.getenv("MAX_RETRIES", "3")))
+
+    def __post_init__(self):
+        """Validate configuration after initialization."""
+        if self.PORT < 1 or self.PORT > 65535:
+            raise ValueError(f"Invalid port number: {self.PORT}")
+        if self.MONITORING_INTERVAL_HOURS < 1:
+            raise ValueError("Monitoring interval must be at least 1 hour")
 
 
 settings = Settings()
