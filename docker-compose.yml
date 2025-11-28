@@ -1,0 +1,48 @@
+version: '3.8'
+
+services:
+  geoguessr-mcp:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: geoguessr-mcp-server
+    restart: unless-stopped
+    ports:
+      - "${MCP_PORT:-8000}:8000"
+    environment:
+      # Required: Your GeoGuessr _ncfa cookie for authentication
+      - GEOGUESSR_NCFA_COOKIE=${GEOGUESSR_NCFA_COOKIE}
+      # MCP Server configuration
+      - MCP_TRANSPORT=${MCP_TRANSPORT:-streamable-http}
+      - MCP_HOST=0.0.0.0
+      - MCP_PORT=8000
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  # Optional: Nginx reverse proxy with SSL (recommended for production)
+  # Uncomment and configure if you want SSL termination
+  # nginx:
+  #   image: nginx:alpine
+  #   container_name: geoguessr-mcp-nginx
+  #   restart: unless-stopped
+  #   ports:
+  #     - "80:80"
+  #     - "443:443"
+  #   volumes:
+  #     - ./nginx.conf:/etc/nginx/nginx.conf:ro
+  #     - ./ssl:/etc/nginx/ssl:ro
+  #   depends_on:
+  #     - geoguessr-mcp
+
+networks:
+  default:
+    name: geoguessr-mcp-network

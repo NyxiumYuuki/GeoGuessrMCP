@@ -1,0 +1,46 @@
+version: '3.8'
+
+services:
+  dev:
+    build:
+      context: ..
+      dockerfile: .devcontainer/Dockerfile.dev
+    volumes:
+      # Mount the workspace
+      - ..:/workspace:cached
+      # Persist VS Code extensions
+      - vscode-extensions:/home/vscode/.vscode-server/extensions
+      # Persist pip cache
+      - pip-cache:/home/vscode/.cache/pip
+      # Docker socket for Docker-in-Docker (optional)
+      # - /var/run/docker.sock:/var/run/docker.sock
+
+    # Keep container running
+    command: sleep infinity
+
+    # Environment
+    environment:
+      - PYTHONDONTWRITEBYTECODE=1
+      - PYTHONUNBUFFERED=1
+      # Load from .env file
+      - GEOGUESSR_NCFA_COOKIE=${GEOGUESSR_NCFA_COOKIE:-}
+      - MCP_TRANSPORT=streamable-http
+      - MCP_HOST=0.0.0.0
+      - MCP_PORT=8000
+
+    # Ports
+    ports:
+      - "8000:8000"
+      - "5678:5678"  # debugpy port
+
+    # Network
+    networks:
+      - dev-network
+
+volumes:
+  vscode-extensions:
+  pip-cache:
+
+networks:
+  dev-network:
+    name: geoguessr-mcp-dev
