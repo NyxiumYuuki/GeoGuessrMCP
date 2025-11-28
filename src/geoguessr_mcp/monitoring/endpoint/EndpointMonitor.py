@@ -1,34 +1,29 @@
 """
-API Endpoint Monitor.
+Monitors GeoGuessr API endpoints for availability and schema changes.
 
-This module provides automated monitoring of GeoGuessr API endpoints,
-checking their availability and detecting response format changes.
+This module is responsible for monitoring a set of known GeoGuessr API endpoints
+to ensure their availability and detect schema changes. It periodically checks
+each endpoint, logs relevant details about its status, and updates a schema
+registry when necessary.
+
+Classes:
+    EndpointMonitor: Manages periodic checks of API endpoints, updates schema
+    registry, and logs activity.
 """
 
 import asyncio
 import logging
-from dataclasses import dataclass, field
 from datetime import datetime, UTC
 from typing import Optional
 
 import httpx
 
-from ..config import settings
-from .schema_manager import SchemaRegistry, schema_registry
+from ...config import settings
+from .EndpointDefinition import EndpointDefinition
+from .EndpointMonitoringResult import MonitoringResult
+from ..schema.SchemaRegistry import SchemaRegistry, schema_registry
 
 logger = logging.getLogger(__name__)
-
-
-@dataclass
-class EndpointDefinition:
-    """Definition of an API endpoint to monitor."""
-    path: str
-    method: str = "GET"
-    requires_auth: bool = True
-    use_game_server: bool = False
-    params: dict = field(default_factory=dict)
-    description: str = ""
-
 
 # Known GeoGuessr API endpoints to monitor
 MONITORED_ENDPOINTS = [
@@ -120,19 +115,6 @@ MONITORED_ENDPOINTS = [
         description="Tournament information",
     ),
 ]
-
-
-@dataclass
-class MonitoringResult:
-    """Result of monitoring an endpoint."""
-    endpoint: str
-    is_available: bool
-    response_code: int
-    response_time_ms: float
-    schema_changed: bool
-    error_message: Optional[str] = None
-    timestamp: datetime = field(default_factory=lambda: datetime.now(UTC))
-
 
 class EndpointMonitor:
     """
