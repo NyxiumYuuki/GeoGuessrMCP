@@ -11,6 +11,11 @@ __pycache__/
 venv/
 .venv/
 ENV/
+env/
+*.egg-info/
+dist/
+build/
+.eggs/
 
 # IDE
 .idea/
@@ -18,10 +23,13 @@ ENV/
 *.swp
 *.swo
 *~
+.project
+.pydevproject
 
 # OS
 .DS_Store
 Thumbs.db
+*.bak
 
 # Docker
 docker-compose.override.yml
@@ -31,7 +39,28 @@ docker-compose.override.yml
 logs/
 
 # SSL certificates (if stored locally)
-ssl/
+nginx/ssl/
 *.pem
 *.crt
 *.key
+
+# Data and cache
+data/
+*.cache
+.cache/
+
+# Coverage
+.coverage
+htmlcov/
+coverage.xml
+*.cover
+
+# MyPy
+.mypy_cache/
+.dmypy.json
+
+# Pytest
+.pytest_cache/
+
+# Ruff
+.ruff_cache/
