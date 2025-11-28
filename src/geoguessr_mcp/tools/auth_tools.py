@@ -13,18 +13,18 @@ def register_auth_tools(mcp: FastMCP, session_manager: SessionManager):
     @mcp.tool()
     async def login(email: str, password: str) -> dict:
         """
-        Authenticate with Geoguessr using your email and password.
+        Authenticate with GeoGuessr using your email and password.
         This creates a session that will be used for all later API calls.
 
         Args:
-            email: Your Geoguessr account email
-            password: Your Geoguessr account password
+            email: Your GeoGuessr account email
+            password: Your GeoGuessr account password
 
         Returns:
             Session information including username and session token
 
         Note: Your credentials are only used to get an authentication token
-        from Geoguessr. They are not stored on the server.
+        from GeoGuessr. They are not stored on the server.
         """
 
         try:
@@ -48,7 +48,7 @@ def register_auth_tools(mcp: FastMCP, session_manager: SessionManager):
     @mcp.tool()
     async def logout() -> dict:
         """
-        Logout from the current Geoguessr session.
+        Logout from the current GeoGuessr session.
         This invalidates the current session token.
         """
         global _current_session_token
