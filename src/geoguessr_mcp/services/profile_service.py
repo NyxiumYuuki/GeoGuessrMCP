@@ -1,136 +1,184 @@
 """
-Profile-related business logic.
+Profile service for user data operations.
+
+This service handles profile, stats, and achievement data with
+dynamic schema adaptation.
 """
 
+import logging
 from typing import Optional
-from ..api.client import GeoguessrClient
+
+from ..api.client import GeoGuessrClient, DynamicResponse
 from ..api.endpoints import Endpoints
-from ..models.profile import UserProfile, UserStats
+from ..models.Achievement import Achievement
+from ..models.UserProfile import UserProfile
+from ..models.UserStats import UserStats
+
+logger = logging.getLogger(__name__)
 
 
 class ProfileService:
-    """Service for profile operations."""
+    """Service for profile-related operations."""
 
-    def __init__(self, client: GeoguessrClient):
-        """
-        Initialize the profile service.
-
-        Args:
-            client: GeoGuessr API client
-        """
+    def __init__(self, client: GeoGuessrClient):
         self.client = client
 
     async def get_profile(
         self,
-        session_token: Optional[str] = None
-    ) -> UserProfile:
+        session_token: Optional[str] = None,
+    ) -> tuple[UserProfile, DynamicResponse]:
         """
-        Get user profile.
-
-        Args:
-            session_token: Optional session token for authentication
+        Get current user's profile.
 
         Returns:
-            UserProfile with user information
-
-        Raises:
-            httpx.HTTPError: If the API request fails
+            Tuple of (UserProfile, DynamicResponse) for both structured and raw access
         """
-        response = await self.client.get(
-            Endpoints.PROFILES.GET_PROFILE,
-            session_token
-        )
-        data = response.json()
-        return UserProfile.from_api_response(data)
+        response = await self.client.get(Endpoints.PROFILES.GET_PROFILE, session_token)
+
+        if response.is_success:
+            profile = UserProfile.from_api_response(response.data)
+            return profile, response
+
+        raise ValueError(f"Failed to get profile: {response.data}")
 
     async def get_stats(
         self,
-        session_token: Optional[str] = None
-    ) -> UserStats:
+        session_token: Optional[str] = None,
+    ) -> tuple[UserStats, DynamicResponse]:
         """
         Get user statistics.
 
-        Args:
-            session_token: Optional session token for authentication
-
         Returns:
-            UserStats with user statistics
-
-        Raises:
-            httpx.HTTPError: If the API request fails
+            Tuple of (UserStats, DynamicResponse)
         """
-        response = await self.client.get(
-            Endpoints.PROFILES.GET_STATS,
-            session_token
-        )
-        data = response.json()
-        return UserStats.from_api_response(data)
+        response = await self.client.get(Endpoints.PROFILES.GET_STATS, session_token)
+
+        if response.is_success:
+            stats = UserStats.from_api_response(response.data)
+            return stats, response
+
+        raise ValueError(f"Failed to get stats: {response.data}")
 
     async def get_extended_stats(
         self,
-        session_token: Optional[str] = None
-    ) -> dict:
+        session_token: Optional[str] = None,
+    ) -> DynamicResponse:
         """
-        Get extended user statistics.
+        Get extended statistics.
 
-        Args:
-            session_token: Optional session token for authentication
-
-        Returns:
-            Dictionary with extended statistics
-
-        Raises:
-            httpx.HTTPError: If the API request fails
+        Returns raw DynamicResponse as extended stats have variable schema.
         """
-        response = await self.client.get(
-            Endpoints.PROFILES.GET_EXTENDED_STATS,
-            session_token
-        )
-        return response.json()
+        return await self.client.get(Endpoints.PROFILES.GET_EXTENDED_STATS, session_token)
 
     async def get_achievements(
         self,
-        session_token: Optional[str] = None
-    ) -> list:
+        session_token: Optional[str] = None,
+    ) -> tuple[list[Achievement], DynamicResponse]:
         """
         Get user achievements.
 
-        Args:
-            session_token: Optional session token for authentication
-
         Returns:
-            List of achievement dictionaries
-
-        Raises:
-            httpx.HTTPError: If the API request fails
+            Tuple of (list of Achievement, DynamicResponse)
         """
-        response = await self.client.get(
-            Endpoints.PROFILES.GET_ACHIEVEMENTS,
-            session_token
-        )
-        return response.json()
+        response = await self.client.get(Endpoints.PROFILES.GET_ACHIEVEMENTS, session_token)
+
+        if response.is_success:
+            achievements = []
+            data = response.data
+
+            # Handle different response formats
+            if isinstance(data, list):
+                achievements = [Achievement.from_api_response(a) for a in data]
+            elif isinstance(data, dict) and "achievements" in data:
+                achievements = [Achievement.from_api_response(a) for a in data["achievements"]]
+
+            return achievements, response
+
+        raise ValueError(f"Failed to get achievements: {response.data}")
 
     async def get_public_profile(
         self,
         user_id: str,
-        session_token: Optional[str] = None
-    ) -> UserProfile:
+        session_token: Optional[str] = None,
+    ) -> tuple[UserProfile, DynamicResponse]:
+        """Get another user's public profile."""
+        endpoint = Endpoints.PROFILES.get_public_profile(user_id)
+        response = await self.client.get(endpoint, session_token)
+
+        if response.is_success:
+            profile = UserProfile.from_api_response(response.data)
+            return profile, response
+
+        raise ValueError(f"Failed to get public profile: {response.data}")
+
+    async def get_user_maps(
+        self,
+        session_token: Optional[str] = None,
+    ) -> DynamicResponse:
+        """Get user's custom maps."""
+        return await self.client.get(Endpoints.PROFILES.GET_USER_MAPS, session_token)
+
+    async def get_comprehensive_profile(
+        self,
+        session_token: Optional[str] = None,
+    ) -> dict:
         """
-        Get public profile of another user.
+        Get a comprehensive profile combining multiple endpoints.
 
-        Args:
-            user_id: User ID to fetch
-            session_token: Optional session token for authentication
-
-        Returns:
-            UserProfile with public user information
-
-        Raises:
-            httpx.HTTPError: If the API request fails
+        This method aggregates data from multiple sources and provides
+        a unified view with schema information for the LLM.
         """
-        response = await self.client.get(
-            Endpoints.PROFILES.get_public_profile(user_id),
-            session_token
-        )
-        data = response.json()
-        return UserProfile.from_api_response(data)
+        results = {
+            "profile": None,
+            "stats": None,
+            "extended_stats": None,
+            "achievements": None,
+            "schema_info": {},
+            "errors": [],
+        }
+
+        # Get profile
+        try:
+            profile, response = await self.get_profile(session_token)
+            results["profile"] = profile.to_dict()
+            results["schema_info"]["profile"] = response.available_fields
+        except Exception as e:
+            results["errors"].append(f"Profile: {str(e)}")
+
+        # Get stats
+        try:
+            stats, response = await self.get_stats(session_token)
+            results["stats"] = stats.to_dict()
+            results["schema_info"]["stats"] = response.available_fields
+        except Exception as e:
+            results["errors"].append(f"Stats: {str(e)}")
+
+        # Get extended stats
+        try:
+            response = await self.get_extended_stats(session_token)
+            if response.is_success:
+                results["extended_stats"] = response.summarize()
+                results["schema_info"]["extended_stats"] = response.available_fields
+        except Exception as e:
+            results["errors"].append(f"Extended stats: {str(e)}")
+
+        # Get achievements summary
+        try:
+            achievements, response = await self.get_achievements(session_token)
+            unlocked = [a for a in achievements if a.unlocked]
+            results["achievements"] = {
+                "total": len(achievements),
+                "unlocked": len(unlocked),
+                "recent": [
+                    {"name": a.name, "unlocked_at": a.unlocked_at}
+                    for a in sorted(
+                        unlocked,
+                        key=lambda x: x.unlocked_at or "",
+                        reverse=True
+                    )[:5]
+                ],
+            }
+        except Exception as e:
+            results["errors"].append(f"Achievements: {str(e)}")
+
+        return results
