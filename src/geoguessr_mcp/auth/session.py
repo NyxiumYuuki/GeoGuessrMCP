@@ -1,5 +1,5 @@
 """
-Session management for Geoguessr authentication.
+Session management for GeoGuessr authentication.
 """
 
 import asyncio
@@ -11,12 +11,14 @@ from typing import Optional
 
 import httpx
 
+from ..config import settings
+
 logger = logging.getLogger(__name__)
 
 
 @dataclass
 class UserSession:
-    """Represents an authenticated Geoguessr session."""
+    """Represents an authenticated GeoGuessr session."""
 
     ncfa_cookie: str
     user_id: str
@@ -38,7 +40,7 @@ class SessionManager:
     def __init__(self, default_cookie: Optional[str] = None):
         self._sessions: dict[str, UserSession] = {}
         self._user_sessions: dict[str, str] = {}
-        self._default_cookie: Optional[str] = default_cookie
+        self._default_cookie: Optional[str] = default_cookie or settings.DEFAULT_NCFA_COOKIE
         self._lock = asyncio.Lock()
 
     @staticmethod
@@ -47,15 +49,15 @@ class SessionManager:
         return secrets.token_urlsafe(32)
 
     async def login(
-        self, email: str, password: str, base_url: str = "https://www.geoguessr.com/api"
+        self, email: str, password: str, base_url: str = settings.GEOGUESSR_API_URL
     ) -> tuple[str, UserSession]:
         """
-        Authenticate with Geoguessr and create a session.
+        Authenticate with GeoGuessr and create a session.
 
         Args:
             email: User's email address
             password: User's password
-            base_url: Geoguessr API base URL
+            base_url: GeoGuessr API base URL
 
         Returns:
             tuple[str, UserSession]: (session_token, UserSession) on success
@@ -86,7 +88,7 @@ class SessionManager:
                 raise ValueError("No session cookie received")
 
             # Get user profile
-            client.cookies.set("_ncfa", ncfa_cookie, domain="www.geoguessr.com")
+            client.cookies.set("_ncfa", ncfa_cookie, domain=settings.GEOGUESSR_DOMAIN_NAME)
             profile_response = await client.get(f"{base_url}/v3/profiles")
 
             if profile_response.status_code != 200:
@@ -199,3 +201,23 @@ class SessionManager:
         async with self._lock:
             self._default_cookie = cookie
             logger.info("Default NCFA cookie updated")
+
+    @staticmethod
+    async def validate_cookie(cookie: str) -> Optional[dict]:
+        """
+        Validate a cookie by making a test request.
+
+        Returns:
+            User profile dict if valid, None otherwise
+        """
+        try:
+            async with httpx.AsyncClient(timeout=30.0) as client:
+                client.cookies.set("_ncfa", cookie, domain=settings.GEOGUESSR_DOMAIN_NAME)
+                response = await client.get(
+                    f"{settings.GEOGUESSR_API_URL}/v3/profiles"
+                )
+                if response.status_code == 200:
+                    return response.json()
+        except Exception as e:
+            logger.warning(f"Cookie validation failed: {e}")
+        return None
