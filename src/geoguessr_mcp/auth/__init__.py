@@ -1,6 +1,7 @@
 """Auth module for GeoGuessr session."""
 
-from .session import UserSession, SessionManager
+from .session import SessionManager, UserSession
+
 __all__ = [
     "UserSession",
     "SessionManager",

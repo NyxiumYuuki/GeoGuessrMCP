@@ -8,7 +8,7 @@ dynamic schema adaptation.
 import logging
 from typing import Optional
 
-from ..api.client import GeoGuessrClient, DynamicResponse
+from ..api.client import DynamicResponse, GeoGuessrClient
 from ..api.endpoints import Endpoints
 from ..models.Achievement import Achievement
 from ..models.UserProfile import UserProfile
@@ -171,11 +171,7 @@ class ProfileService:
                 "unlocked": len(unlocked),
                 "recent": [
                     {"name": a.name, "unlocked_at": a.unlocked_at}
-                    for a in sorted(
-                        unlocked,
-                        key=lambda x: x.unlocked_at or "",
-                        reverse=True
-                    )[:5]
+                    for a in sorted(unlocked, key=lambda x: x.unlocked_at or "", reverse=True)[:5]
                 ],
             }
         except Exception as e:

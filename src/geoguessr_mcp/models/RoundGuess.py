@@ -7,6 +7,7 @@ from typing import Optional
 @dataclass
 class RoundGuess:
     """Represents a single round guess in a game."""
+
     round_number: int
     score: int
     distance_meters: float

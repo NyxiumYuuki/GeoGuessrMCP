@@ -6,6 +6,7 @@ from dataclasses import dataclass, field
 @dataclass
 class SeasonStats:
     """Competitive season statistics."""
+
     season_id: str
     season_name: str = ""
     rank: int = 0

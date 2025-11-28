@@ -12,10 +12,9 @@ Classes:
 
 import json
 import logging
-from datetime import datetime, UTC
+from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any, Optional
-
 
 from ...config import settings
 from .EndpointSchema import EndpointSchema
@@ -78,9 +77,7 @@ class SchemaRegistry:
         try:
             with open(self._get_schema_file(), "w") as f:
                 json.dump(
-                    {ep: schema.to_dict() for ep, schema in self.schemas.items()},
-                    f,
-                    indent=2
+                    {ep: schema.to_dict() for ep, schema in self.schemas.items()}, f, indent=2
                 )
 
             with open(self._get_history_file(), "w") as f:
@@ -90,17 +87,13 @@ class SchemaRegistry:
                         for ep, history in self.schema_history.items()
                     },
                     f,
-                    indent=2
+                    indent=2,
                 )
         except Exception as e:
             logger.error(f"Failed to save schemas: {e}")
 
     def update_schema(
-            self,
-            endpoint: str,
-            response_data: Any,
-            response_code: int = 200,
-            method: str = "GET"
+        self, endpoint: str, response_data: Any, response_code: int = 200, method: str = "GET"
     ) -> tuple[EndpointSchema, bool]:
         """
         Update schema for an endpoint based on response data.
@@ -143,12 +136,7 @@ class SchemaRegistry:
 
         return new_schema, schema_changed
 
-    def mark_unavailable(
-            self,
-            endpoint: str,
-            error_message: str,
-            response_code: int = 0
-    ) -> None:
+    def mark_unavailable(self, endpoint: str, error_message: str, response_code: int = 0) -> None:
         """Mark an endpoint as unavailable."""
         if endpoint in self.schemas:
             self.schemas[endpoint].is_available = False
@@ -191,7 +179,7 @@ class SchemaRegistry:
                     "response_code": schema.response_code,
                 }
                 for endpoint, schema in self.schemas.items()
-            }
+            },
         }
 
     def generate_dynamic_description(self, endpoint: str) -> str:
@@ -228,14 +216,10 @@ class SchemaRegistry:
         """Truncate sample response for storage."""
         if isinstance(data, dict):
             return {
-                k: SchemaRegistry._truncate_sample(v, max_items)
-                for k, v in list(data.items())[:20]
+                k: SchemaRegistry._truncate_sample(v, max_items) for k, v in list(data.items())[:20]
             }
         if isinstance(data, list):
-            return [
-                SchemaRegistry._truncate_sample(item, max_items)
-                for item in data[:max_items]
-            ]
+            return [SchemaRegistry._truncate_sample(item, max_items) for item in data[:max_items]]
         if isinstance(data, str) and len(data) > 200:
             return data[:200] + "..."
         return data

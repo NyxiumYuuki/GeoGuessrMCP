@@ -21,6 +21,7 @@ logger = logging.getLogger(__name__)
 @dataclass
 class GameAnalysis:
     """Analysis results for a set of games."""
+
     games_analyzed: int = 0
     total_score: int = 0
     average_score: float = 0.0
@@ -88,15 +89,9 @@ class AnalysisService:
 
         # Calculate averages
         avg_distance = (
-            sum(r.distance_meters for r in all_rounds) / total_rounds
-            if total_rounds > 0
-            else 0
+            sum(r.distance_meters for r in all_rounds) / total_rounds if total_rounds > 0 else 0
         )
-        avg_time = (
-            sum(r.time_seconds for r in all_rounds) / total_rounds
-            if total_rounds > 0
-            else 0
-        )
+        avg_time = sum(r.time_seconds for r in all_rounds) / total_rounds if total_rounds > 0 else 0
 
         # Find best and worst
         scores = [g.total_score for g in games]
@@ -106,9 +101,7 @@ class AnalysisService:
         # Determine trend (simple moving average comparison)
         trend = "stable"
         if len(games) >= 4:
-            first_half = sum(g.total_score for g in games[: len(games) // 2]) / (
-                len(games) // 2
-            )
+            first_half = sum(g.total_score for g in games[: len(games) // 2]) / (len(games) // 2)
             second_half = sum(g.total_score for g in games[len(games) // 2 :]) / (
                 len(games) - len(games) // 2
             )
@@ -124,18 +117,22 @@ class AnalysisService:
         for game in games:
             for round_guess in game.rounds:
                 if round_guess.score < 2000:
-                    weak_areas.append({
-                        "game": game.token,
-                        "round": round_guess.round_number,
-                        "score": round_guess.score,
-                        "distance": round_guess.distance_meters,
-                    })
+                    weak_areas.append(
+                        {
+                            "game": game.token,
+                            "round": round_guess.round_number,
+                            "score": round_guess.score,
+                            "distance": round_guess.distance_meters,
+                        }
+                    )
                 elif round_guess.score >= 4500:
-                    strong_areas.append({
-                        "game": game.token,
-                        "round": round_guess.round_number,
-                        "score": round_guess.score,
-                    })
+                    strong_areas.append(
+                        {
+                            "game": game.token,
+                            "round": round_guess.round_number,
+                            "score": round_guess.score,
+                        }
+                    )
 
         return GameAnalysis(
             games_analyzed=len(games),
@@ -204,9 +201,7 @@ class AnalysisService:
 
         # Get comprehensive profile
         try:
-            results["profile"] = await self.profile_service.get_comprehensive_profile(
-                session_token
-            )
+            results["profile"] = await self.profile_service.get_comprehensive_profile(session_token)
         except Exception as e:
             results["errors"].append(f"Profile: {str(e)}")
 
@@ -227,17 +222,13 @@ class AnalysisService:
 
         # Analyze recent games
         try:
-            results["recent_games_analysis"] = await self.analyze_recent_games(
-                5, session_token
-            )
+            results["recent_games_analysis"] = await self.analyze_recent_games(5, session_token)
         except Exception as e:
             results["errors"].append(f"Recent games: {str(e)}")
 
         # Get explorer progress
         try:
-            response = await self.client.get(
-                self._create_endpoint("/v3/explorer"), session_token
-            )
+            response = await self.client.get(self._create_endpoint("/v3/explorer"), session_token)
             if response.is_success:
                 results["explorer"] = response.summarize()
         except Exception as e:
@@ -245,9 +236,7 @@ class AnalysisService:
 
         # Get objectives
         try:
-            response = await self.client.get(
-                self._create_endpoint("/v4/objectives"), session_token
-            )
+            response = await self.client.get(self._create_endpoint("/v4/objectives"), session_token)
             if response.is_success:
                 results["objectives"] = response.summarize()
         except Exception as e:
@@ -273,42 +262,50 @@ class AnalysisService:
 
         # Analyze perfect round rate
         if analysis.perfect_round_percentage < 20:
-            recommendations.append({
-                "category": "accuracy",
-                "priority": "high",
-                "recommendation": "Focus on improving pinpoint accuracy",
-                "detail": f"Your perfect round rate is {analysis.perfect_round_percentage:.1f}%. "
-                         "Practice with familiar maps to build confidence.",
-            })
+            recommendations.append(
+                {
+                    "category": "accuracy",
+                    "priority": "high",
+                    "recommendation": "Focus on improving pinpoint accuracy",
+                    "detail": f"Your perfect round rate is {analysis.perfect_round_percentage:.1f}%. "
+                    "Practice with familiar maps to build confidence.",
+                }
+            )
 
         # Analyze time usage
         if analysis.average_time_seconds < 30:
-            recommendations.append({
-                "category": "time_management",
-                "priority": "medium",
-                "recommendation": "Consider taking more time per round",
-                "detail": f"Average time: {analysis.average_time_seconds:.0f}s. "
-                         "Taking a bit more time can improve accuracy.",
-            })
+            recommendations.append(
+                {
+                    "category": "time_management",
+                    "priority": "medium",
+                    "recommendation": "Consider taking more time per round",
+                    "detail": f"Average time: {analysis.average_time_seconds:.0f}s. "
+                    "Taking a bit more time can improve accuracy.",
+                }
+            )
 
         # Analyze score trend
         if analysis.score_trend == "declining":
-            recommendations.append({
-                "category": "consistency",
-                "priority": "high",
-                "recommendation": "Your scores are trending downward",
-                "detail": "Consider taking breaks and reviewing your weak areas.",
-            })
+            recommendations.append(
+                {
+                    "category": "consistency",
+                    "priority": "high",
+                    "recommendation": "Your scores are trending downward",
+                    "detail": "Consider taking breaks and reviewing your weak areas.",
+                }
+            )
 
         # Check for weak areas pattern
         if len(analysis.weak_areas) > 5:
-            recommendations.append({
-                "category": "practice",
-                "priority": "medium",
-                "recommendation": "Practice specific regions",
-                "detail": f"You had {len(analysis.weak_areas)} rounds under 2000 points. "
-                         "Consider using region-specific practice maps.",
-            })
+            recommendations.append(
+                {
+                    "category": "practice",
+                    "priority": "medium",
+                    "recommendation": "Practice specific regions",
+                    "detail": f"You had {len(analysis.weak_areas)} rounds under 2000 points. "
+                    "Consider using region-specific practice maps.",
+                }
+            )
 
         return {
             "analysis_summary": {
@@ -331,4 +328,5 @@ class AnalysisService:
     def _create_endpoint(path: str):
         """Create simple endpoint info for raw requests."""
         from ..api.endpoints import EndpointInfo
+
         return EndpointInfo(path=path, description=f"Request to {path}")

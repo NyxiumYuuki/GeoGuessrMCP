@@ -60,7 +60,8 @@ class SchemaDetector:
     def _is_uuid(value: str) -> bool:
         """Check if string is UUID format."""
         import re
-        uuid_pattern = r'^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$'
+
+        uuid_pattern = r"^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
         return bool(re.match(uuid_pattern, value.lower()))
 
     @staticmethod
@@ -86,13 +87,7 @@ class SchemaDetector:
         self._analyze_object(data, fields, "", max_depth)
         return fields
 
-    def _analyze_object(
-            self,
-            obj: dict,
-            fields: dict,
-            prefix: str,
-            remaining_depth: int
-    ) -> None:
+    def _analyze_object(self, obj: dict, fields: dict, prefix: str, remaining_depth: int) -> None:
         """Recursively analyze an object and extract field information."""
         if remaining_depth <= 0:
             return
@@ -121,7 +116,6 @@ class SchemaDetector:
     def compute_schema_hash(fields: dict[str, SchemaField]) -> str:
         """Compute a hash of the schema for change detection."""
         schema_repr = json.dumps(
-            {name: (f.field_type, f.nullable) for name, f in sorted(fields.items())},
-            sort_keys=True
+            {name: (f.field_type, f.nullable) for name, f in sorted(fields.items())}, sort_keys=True
         )
         return hashlib.sha256(schema_repr.encode()).hexdigest()[:16]

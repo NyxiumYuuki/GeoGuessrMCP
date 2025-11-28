@@ -96,6 +96,7 @@ class DynamicResponse:
 
         This reduces token usage while providing essential information.
         """
+
         def summarize_value(value: Any, depth: int) -> Any:
             if depth <= 0:
                 if isinstance(value, (dict, list)):
@@ -103,10 +104,7 @@ class DynamicResponse:
                 return value
 
             if isinstance(value, dict):
-                return {
-                    k: summarize_value(v, depth - 1)
-                    for k, v in list(value.items())[:10]
-                }
+                return {k: summarize_value(v, depth - 1) for k, v in list(value.items())[:10]}
             if isinstance(value, list):
                 if len(value) == 0:
                     return []
@@ -163,11 +161,7 @@ class GeoGuessrClient:
     @staticmethod
     def _get_base_url(endpoint: EndpointInfo) -> str:
         """Get the appropriate base URL for an endpoint."""
-        return (
-            settings.GAME_SERVER_URL
-            if endpoint.use_game_server
-            else settings.GEOGUESSR_API_URL
-        )
+        return settings.GAME_SERVER_URL if endpoint.use_game_server else settings.GEOGUESSR_API_URL
 
     async def request(
         self,
@@ -199,6 +193,7 @@ class GeoGuessrClient:
         logger.debug(f"{endpoint.method} {url}")
 
         import time
+
         start_time = time.time()
 
         async with await self._get_authenticated_client(session_token) as client:

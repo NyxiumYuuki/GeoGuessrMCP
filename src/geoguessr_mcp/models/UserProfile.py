@@ -7,6 +7,7 @@ from typing import Optional
 @dataclass
 class UserProfile:
     """User profile information."""
+
     id: str
     nick: str
     email: str = ""
@@ -30,7 +31,9 @@ class UserProfile:
             created=data.get("created", data.get("createdAt", "")),
             is_verified=data.get("isVerified", data.get("verified", False)),
             is_pro=data.get("isPro", data.get("isProUser", False)),
-            avatar_url=data.get("pin", {}).get("url") if isinstance(data.get("pin"), dict) else None,
+            avatar_url=(
+                data.get("pin", {}).get("url") if isinstance(data.get("pin"), dict) else None
+            ),
             raw_data=data,
         )
 

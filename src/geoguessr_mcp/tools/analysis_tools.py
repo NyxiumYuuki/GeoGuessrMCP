@@ -1,4 +1,3 @@
-
 @mcp.tool()
 async def analyze_recent_games(count: int = 10) -> dict:
     """
@@ -11,8 +10,7 @@ async def analyze_recent_games(count: int = 10) -> dict:
     async with await get_async_session() as client:
         # Get activity feed
         feed_response = await client.get(
-            f"{GEOGUESSR_BASE_URL}/v4/feed/private",
-            params={"count": count * 2, "page": 0}
+            f"{GEOGUESSR_BASE_URL}/v4/feed/private", params={"count": count * 2, "page": 0}
         )
         feed_response.raise_for_status()
         feed = feed_response.json()
@@ -27,7 +25,9 @@ async def analyze_recent_games(count: int = 10) -> dict:
                 game_token = entry.get("payload", {}).get("gameToken")
                 if game_token:
                     try:
-                        game_response = await client.get(f"{GEOGUESSR_BASE_URL}/v3/games/{game_token}")
+                        game_response = await client.get(
+                            f"{GEOGUESSR_BASE_URL}/v3/games/{game_token}"
+                        )
                         if game_response.status_code == 200:
                             game = game_response.json()
 
@@ -36,17 +36,19 @@ async def analyze_recent_games(count: int = 10) -> dict:
                                 "map": game.get("map", {}).get("name", "Unknown"),
                                 "mode": game.get("type", "Unknown"),
                                 "total_score": 0,
-                                "rounds": []
+                                "rounds": [],
                             }
 
                             for round_data in game.get("player", {}).get("guesses", []):
                                 round_score = round_data.get("roundScoreInPoints", 0)
                                 game_info["total_score"] += round_score
-                                game_info["rounds"].append({
-                                    "score": round_score,
-                                    "distance": round_data.get("distanceInMeters", 0),
-                                    "time": round_data.get("time", 0)
-                                })
+                                game_info["rounds"].append(
+                                    {
+                                        "score": round_score,
+                                        "distance": round_data.get("distanceInMeters", 0),
+                                        "time": round_data.get("time", 0),
+                                    }
+                                )
 
                                 total_rounds += 1
                                 if round_score == 5000:
@@ -63,8 +65,10 @@ async def analyze_recent_games(count: int = 10) -> dict:
             "average_score": total_score / len(games_analyzed) if games_analyzed else 0,
             "total_rounds": total_rounds,
             "perfect_rounds": perfect_rounds,
-            "perfect_round_percentage": (perfect_rounds / total_rounds * 100) if total_rounds > 0 else 0,
-            "games": games_analyzed
+            "perfect_round_percentage": (
+                (perfect_rounds / total_rounds * 100) if total_rounds > 0 else 0
+            ),
+            "games": games_analyzed,
         }
 
 
@@ -111,12 +115,14 @@ async def get_performance_summary() -> dict:
 
         # Get achievements
         try:
-            achievements_response = await client.get(f"{GEOGUESSR_BASE_URL}/v3/profiles/achievements")
+            achievements_response = await client.get(
+                f"{GEOGUESSR_BASE_URL}/v3/profiles/achievements"
+            )
             achievements_response.raise_for_status()
             achievements = achievements_response.json()
             results["achievements_summary"] = {
                 "total": len(achievements) if isinstance(achievements, list) else 0,
-                "achievements": achievements
+                "achievements": achievements,
             }
         except Exception as e:
             results["achievements_error"] = str(e)

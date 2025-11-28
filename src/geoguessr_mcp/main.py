@@ -84,8 +84,7 @@ def main():
         logger.info("Default authentication cookie configured from environment")
     else:
         logger.warning(
-            "No default authentication cookie set. "
-            "Users will need to login or provide a cookie."
+            "No default authentication cookie set. " "Users will need to login or provide a cookie."
         )
 
     # Run the server

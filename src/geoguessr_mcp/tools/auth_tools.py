@@ -1,5 +1,7 @@
 """MCP tools for auth operations."""
+
 import logging
+
 from mcp.server.fastmcp import FastMCP
 
 from ..auth.session import SessionManager
@@ -44,7 +46,6 @@ def register_auth_tools(mcp: FastMCP, session_manager: SessionManager):
             logger.error(f"Login error: {e}")
             return {"success": False, "error": f"An unexpected error occurred: {str(e)}"}
 
-
     @mcp.tool()
     async def logout() -> dict:
         """
@@ -62,7 +63,6 @@ def register_auth_tools(mcp: FastMCP, session_manager: SessionManager):
             }
 
         return {"success": False, "message": "No active session"}
-
 
     @mcp.tool()
     async def set_session_token(token: str) -> dict:
@@ -85,7 +85,6 @@ def register_auth_tools(mcp: FastMCP, session_manager: SessionManager):
             }
 
         return {"success": False, "error": "Invalid or expired session token"}
-
 
     @mcp.tool()
     async def set_ncfa_cookie(cookie: str) -> dict:
@@ -134,7 +133,6 @@ def register_auth_tools(mcp: FastMCP, session_manager: SessionManager):
                 "user_id": session.user_id,
                 "session_token": session_token,
             }
-
 
     @mcp.tool()
     async def get_auth_status() -> dict:

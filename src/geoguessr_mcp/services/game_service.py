@@ -7,11 +7,11 @@ Handles game history, details, and competitive data with dynamic schema support.
 import logging
 from typing import Optional
 
-from ..api.client import GeoGuessrClient, DynamicResponse
+from ..api.client import DynamicResponse, GeoGuessrClient
 from ..api.endpoints import Endpoints
+from ..models.DailyChallenge import DailyChallenge
 from ..models.Game import Game
 from ..models.SeasonStats import SeasonStats
-from ..models.DailyChallenge import DailyChallenge
 
 logger = logging.getLogger(__name__)
 
@@ -23,9 +23,9 @@ class GameService:
         self.client = client
 
     async def get_game_details(
-            self,
-            game_token: str,
-            session_token: Optional[str] = None,
+        self,
+        game_token: str,
+        session_token: Optional[str] = None,
     ) -> tuple[Game, DynamicResponse]:
         """
         Get details for a specific game.
@@ -47,26 +47,26 @@ class GameService:
         raise ValueError(f"Failed to get game details: {response.data}")
 
     async def get_unfinished_games(
-            self,
-            session_token: Optional[str] = None,
+        self,
+        session_token: Optional[str] = None,
     ) -> DynamicResponse:
         """Get list of unfinished games."""
         return await self.client.get(Endpoints.GAMES.GET_UNFINISHED_GAMES, session_token)
 
     async def get_streak_game(
-            self,
-            game_token: str,
-            session_token: Optional[str] = None,
+        self,
+        game_token: str,
+        session_token: Optional[str] = None,
     ) -> DynamicResponse:
         """Get streak game details."""
         endpoint = Endpoints.GAMES.get_streak_game(game_token)
         return await self.client.get(endpoint, session_token)
 
     async def get_activity_feed(
-            self,
-            count: int = 10,
-            page: int = 0,
-            session_token: Optional[str] = None,
+        self,
+        count: int = 10,
+        page: int = 0,
+        session_token: Optional[str] = None,
     ) -> DynamicResponse:
         """
         Get the activity feed.
@@ -83,9 +83,9 @@ class GameService:
         return await self.client.get(endpoint, session_token)
 
     async def get_recent_games(
-            self,
-            count: int = 10,
-            session_token: Optional[str] = None,
+        self,
+        count: int = 10,
+        session_token: Optional[str] = None,
     ) -> list[Game]:
         """
         Get recent games from the activity feed.
@@ -124,8 +124,8 @@ class GameService:
         return games
 
     async def get_season_stats(
-            self,
-            session_token: Optional[str] = None,
+        self,
+        session_token: Optional[str] = None,
     ) -> tuple[SeasonStats, DynamicResponse]:
         """Get active season statistics."""
         response = await self.client.get(
@@ -139,9 +139,9 @@ class GameService:
         raise ValueError(f"Failed to get season stats: {response.data}")
 
     async def get_daily_challenge(
-            self,
-            day: str = "today",
-            session_token: Optional[str] = None,
+        self,
+        day: str = "today",
+        session_token: Optional[str] = None,
     ) -> tuple[DailyChallenge, DynamicResponse]:
         """
         Get daily challenge.
@@ -163,26 +163,26 @@ class GameService:
         raise ValueError(f"Failed to get daily challenge: {response.data}")
 
     async def get_battle_royale(
-            self,
-            game_id: str,
-            session_token: Optional[str] = None,
+        self,
+        game_id: str,
+        session_token: Optional[str] = None,
     ) -> DynamicResponse:
         """Get battle royale game details."""
         endpoint = Endpoints.GAME_SERVER.get_battle_royale(game_id)
         return await self.client.get(endpoint, session_token)
 
     async def get_duel(
-            self,
-            duel_id: str,
-            session_token: Optional[str] = None,
+        self,
+        duel_id: str,
+        session_token: Optional[str] = None,
     ) -> DynamicResponse:
         """Get duel game details."""
         endpoint = Endpoints.GAME_SERVER.get_duel(duel_id)
         return await self.client.get(endpoint, session_token)
 
     async def get_tournaments(
-            self,
-            session_token: Optional[str] = None,
+        self,
+        session_token: Optional[str] = None,
     ) -> DynamicResponse:
         """Get tournament information."""
         return await self.client.get(Endpoints.GAME_SERVER.GET_TOURNAMENTS, session_token)

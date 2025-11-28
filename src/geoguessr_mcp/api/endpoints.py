@@ -13,6 +13,7 @@ from ..config import settings
 @dataclass
 class EndpointInfo:
     """Metadata about an API endpoint."""
+
     path: str
     method: str = "GET"
     description: str = ""
@@ -31,6 +32,7 @@ class Endpoints:
 
     class AUTH:
         """Authentication endpoints."""
+
         SIGNIN = EndpointInfo(
             path="/v3/accounts/signin",
             method="POST",
@@ -40,6 +42,7 @@ class Endpoints:
 
     class PROFILES:
         """User profile and stats endpoints."""
+
         GET_PROFILE = EndpointInfo(
             path="/v3/profiles",
             description="Get current user profile",
@@ -79,6 +82,7 @@ class Endpoints:
 
     class GAMES:
         """Game-related endpoints."""
+
         GET_UNFINISHED_GAMES = EndpointInfo(
             path="/v3/social/events/unfinishedgames",
             description="Get unfinished games",
@@ -102,6 +106,7 @@ class Endpoints:
 
     class GAME_SERVER:
         """Game server endpoints (different base URL)."""
+
         GET_TOURNAMENTS = EndpointInfo(
             path="/tournaments",
             use_game_server=True,
@@ -137,6 +142,7 @@ class Endpoints:
 
     class COMPETITIVE:
         """Competitive and season-related endpoints."""
+
         GET_ACTIVE_SEASON_STATS = EndpointInfo(
             path="/v4/seasons/active/stats",
             description="Get active season statistics",
@@ -171,6 +177,7 @@ class Endpoints:
 
     class SOCIAL:
         """Social and friends endpoints."""
+
         GET_FRIENDS_SUMMARY = EndpointInfo(
             path="/v3/social/friends/summary",
             description="Get friends summary",
@@ -194,9 +201,7 @@ class Endpoints:
             )
 
         @staticmethod
-        def get_friends_activities(
-            time_frame: str = "week", limit: int = 20
-        ) -> EndpointInfo:
+        def get_friends_activities(time_frame: str = "week", limit: int = 20) -> EndpointInfo:
             """Get friends' activities."""
             return EndpointInfo(
                 path="/v3/social/friends/activities",
@@ -206,6 +211,7 @@ class Endpoints:
 
     class MAPS:
         """Map-related endpoints."""
+
         GET_PERSONALIZED_MAPS = EndpointInfo(
             path="/v3/social/maps/browse/personalized",
             description="Get personalized maps",
@@ -243,6 +249,7 @@ class Endpoints:
 
     class EXPLORER:
         """Explorer mode endpoints."""
+
         GET_PROGRESS = EndpointInfo(
             path="/v3/explorer",
             description="Get explorer mode progress",
@@ -250,6 +257,7 @@ class Endpoints:
 
     class OBJECTIVES:
         """Objectives and rewards endpoints."""
+
         GET_OBJECTIVES = EndpointInfo(
             path="/v4/objectives",
             description="Get current objectives",
@@ -261,6 +269,7 @@ class Endpoints:
 
     class SUBSCRIPTION:
         """Subscription-related endpoints."""
+
         GET_INFO = EndpointInfo(
             path="/v3/subscriptions",
             description="Get subscription details",
@@ -281,11 +290,7 @@ class EndpointBuilder:
         Returns:
             Complete URL string
         """
-        base = (
-            settings.GAME_SERVER_URL
-            if endpoint.use_game_server
-            else settings.GEOGUESSR_API_URL
-        )
+        base = settings.GAME_SERVER_URL if endpoint.use_game_server else settings.GEOGUESSR_API_URL
         return f"{base}{endpoint.path}"
 
     @staticmethod

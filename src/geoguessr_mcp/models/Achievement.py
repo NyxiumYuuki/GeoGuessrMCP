@@ -7,6 +7,7 @@ from typing import Optional
 @dataclass
 class Achievement:
     """Represents a user achievement."""
+
     id: str
     name: str
     description: str = ""

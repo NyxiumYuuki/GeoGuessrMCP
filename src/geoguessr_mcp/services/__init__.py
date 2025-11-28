@@ -1,8 +1,8 @@
 """Services module for business logic."""
 
-from .profile_service import ProfileService
-from .game_service import GameService
 from .analysis_service import AnalysisService, GameAnalysis
+from .game_service import GameService
+from .profile_service import ProfileService
 
 __all__ = [
     "ProfileService",

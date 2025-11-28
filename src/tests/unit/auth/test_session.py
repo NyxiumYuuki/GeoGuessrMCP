@@ -19,9 +19,10 @@ TestSessionManager
     login, logout, and session management operations in an async context.
 """
 
-import pytest
-from datetime import datetime, timedelta, UTC
+from datetime import UTC, datetime, timedelta
 from unittest.mock import AsyncMock, MagicMock, patch
+
+import pytest
 
 from geoguessr_mcp.auth.session import SessionManager, UserSession
 

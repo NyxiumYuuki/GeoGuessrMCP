@@ -31,10 +31,7 @@ def mock_profile_data():
         "created": "2025-01-01T00:00:00.000Z",
         "isVerified": True,
         "level": 50,
-        "rating": {
-            "rating": 1500,
-            "deviation": 100
-        }
+        "rating": {"rating": 1500, "deviation": 100},
     }
 
 

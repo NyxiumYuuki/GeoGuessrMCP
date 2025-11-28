@@ -12,6 +12,7 @@ from typing import Any, Optional
 @dataclass
 class SchemaField:
     """Represents a single field in a schema."""
+
     name: str
     field_type: str
     nullable: bool = False

@@ -213,9 +213,7 @@ class SessionManager:
         try:
             async with httpx.AsyncClient(timeout=30.0) as client:
                 client.cookies.set("_ncfa", cookie, domain=settings.GEOGUESSR_DOMAIN_NAME)
-                response = await client.get(
-                    f"{settings.GEOGUESSR_API_URL}/v3/profiles"
-                )
+                response = await client.get(f"{settings.GEOGUESSR_API_URL}/v3/profiles")
                 if response.status_code == 200:
                     return response.json()
         except Exception as e:

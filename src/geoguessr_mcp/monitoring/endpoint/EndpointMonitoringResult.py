@@ -7,13 +7,14 @@ an endpoint, including its availability, response time, and any errors encounter
 """
 
 from dataclasses import dataclass, field
-from datetime import datetime, UTC
+from datetime import UTC, datetime
 from typing import Optional
 
 
 @dataclass
 class MonitoringResult:
     """Result of monitoring an endpoint."""
+
     endpoint: str
     is_available: bool
     response_code: int

@@ -6,6 +6,7 @@ from dataclasses import dataclass, field
 @dataclass
 class UserStats:
     """User statistics from various endpoints."""
+
     games_played: int = 0
     rounds_played: int = 0
     total_score: int = 0

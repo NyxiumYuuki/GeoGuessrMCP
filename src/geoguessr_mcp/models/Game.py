@@ -9,6 +9,7 @@ from .RoundGuess import RoundGuess
 @dataclass
 class Game:
     """Represents a complete game."""
+
     token: str
     map_name: str
     mode: str

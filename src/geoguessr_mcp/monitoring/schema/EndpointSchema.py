@@ -10,7 +10,7 @@ schema information.
 
 import logging
 from dataclasses import dataclass, field
-from datetime import datetime, UTC
+from datetime import UTC, datetime
 from typing import Any, Optional
 
 from .SchemaField import SchemaField
@@ -21,6 +21,7 @@ logger = logging.getLogger(__name__)
 @dataclass
 class EndpointSchema:
     """Schema definition for an API endpoint."""
+
     endpoint: str
     method: str
     fields: dict[str, SchemaField] = field(default_factory=dict)

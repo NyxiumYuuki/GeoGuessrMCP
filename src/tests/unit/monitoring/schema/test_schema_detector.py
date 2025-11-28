@@ -8,8 +8,8 @@ objects, computation of schema hashes, and parsing of specific data formats
 such as datetime strings, URLs, and UUIDs.
 """
 
-from geoguessr_mcp.monitoring.schema.SchemaDetector import SchemaDetector
 from geoguessr_mcp.monitoring.schema.EndpointSchema import SchemaField
+from geoguessr_mcp.monitoring.schema.SchemaDetector import SchemaDetector
 
 
 class TestSchemaDetector:
@@ -94,7 +94,7 @@ class TestSchemaDetector:
                 "id": "123",
                 "profile": {
                     "name": "Test",
-                }
+                },
             }
         }
 

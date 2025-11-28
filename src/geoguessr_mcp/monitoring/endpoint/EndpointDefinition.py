@@ -8,9 +8,11 @@ requirement, and additional parameters.
 
 from dataclasses import dataclass, field
 
+
 @dataclass
 class EndpointDefinition:
     """Definition of an API endpoint to monitor."""
+
     path: str
     method: str = "GET"
     requires_auth: bool = True

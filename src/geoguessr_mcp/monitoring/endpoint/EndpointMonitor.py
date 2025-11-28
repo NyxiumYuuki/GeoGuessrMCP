@@ -13,15 +13,15 @@ Classes:
 
 import asyncio
 import logging
-from datetime import datetime, UTC
+from datetime import UTC, datetime
 from typing import Optional
 
 import httpx
 
 from ...config import settings
+from ..schema.SchemaRegistry import SchemaRegistry, schema_registry
 from .EndpointDefinition import EndpointDefinition
 from .EndpointMonitoringResult import MonitoringResult
-from ..schema.SchemaRegistry import SchemaRegistry, schema_registry
 
 logger = logging.getLogger(__name__)
 
@@ -48,13 +48,11 @@ MONITORED_ENDPOINTS = [
         path="/v3/profiles/maps",
         description="User's custom maps",
     ),
-
     # Game endpoints
     EndpointDefinition(
         path="/v3/social/events/unfinishedgames",
         description="Unfinished games",
     ),
-
     # Social endpoints
     EndpointDefinition(
         path="/v4/feed/private",
@@ -73,19 +71,16 @@ MONITORED_ENDPOINTS = [
         path="/v3/social/maps/browse/personalized",
         description="Personalized map recommendations",
     ),
-
     # Competitive endpoints
     EndpointDefinition(
         path="/v4/seasons/active/stats",
         description="Active season statistics",
     ),
-
     # Explorer endpoints
     EndpointDefinition(
         path="/v3/explorer",
         description="Explorer mode progress",
     ),
-
     # Objectives endpoints
     EndpointDefinition(
         path="/v4/objectives",
@@ -95,19 +90,16 @@ MONITORED_ENDPOINTS = [
         path="/v4/objectives/unclaimed",
         description="Unclaimed objective rewards",
     ),
-
     # Subscription endpoints
     EndpointDefinition(
         path="/v3/subscriptions",
         description="Subscription information",
     ),
-
     # Challenge endpoints
     EndpointDefinition(
         path="/v3/challenges/daily-challenges/today",
         description="Today's daily challenge",
     ),
-
     # Game server endpoints
     EndpointDefinition(
         path="/tournaments",
@@ -115,6 +107,7 @@ MONITORED_ENDPOINTS = [
         description="Tournament information",
     ),
 ]
+
 
 class EndpointMonitor:
     """
@@ -125,9 +118,9 @@ class EndpointMonitor:
     """
 
     def __init__(
-            self,
-            registry: Optional[SchemaRegistry] = None,
-            ncfa_cookie: Optional[str] = None,
+        self,
+        registry: Optional[SchemaRegistry] = None,
+        ncfa_cookie: Optional[str] = None,
     ):
         self.registry = registry or schema_registry
         self.ncfa_cookie = ncfa_cookie or settings.DEFAULT_NCFA_COOKIE
@@ -136,9 +129,9 @@ class EndpointMonitor:
         self._task: Optional[asyncio.Task] = None
 
     async def check_endpoint(
-            self,
-            endpoint: EndpointDefinition,
-            client: httpx.AsyncClient,
+        self,
+        endpoint: EndpointDefinition,
+        client: httpx.AsyncClient,
     ) -> MonitoringResult:
         """
         Check a single endpoint and update its schema.
@@ -151,9 +144,7 @@ class EndpointMonitor:
             MonitoringResult with check details
         """
         base_url = (
-            settings.GAME_SERVER_URL
-            if endpoint.use_game_server
-            else settings.GEOGUESSR_API_URL
+            settings.GAME_SERVER_URL if endpoint.use_game_server else settings.GEOGUESSR_API_URL
         )
         url = f"{base_url}{endpoint.path}"
 
@@ -264,14 +255,16 @@ class EndpointMonitor:
 
                 except Exception as e:
                     logger.error(f"Error checking {endpoint.path}: {e}")
-                    results.append(MonitoringResult(
-                        endpoint=endpoint.path,
-                        is_available=False,
-                        response_code=0,
-                        response_time_ms=0,
-                        schema_changed=False,
-                        error_message=str(e),
-                    ))
+                    results.append(
+                        MonitoringResult(
+                            endpoint=endpoint.path,
+                            is_available=False,
+                            response_code=0,
+                            response_time_ms=0,
+                            schema_changed=False,
+                            error_message=str(e),
+                        )
+                    )
 
         self.results = results
         return results
@@ -334,8 +327,7 @@ class EndpointMonitor:
         changed = [r for r in self.results if r.schema_changed]
 
         avg_response_time = (
-            sum(r.response_time_ms for r in available) / len(available)
-            if available else 0
+            sum(r.response_time_ms for r in available) / len(available) if available else 0
         )
 
         return {
