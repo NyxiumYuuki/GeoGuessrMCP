@@ -1,8 +1,12 @@
 """Shared test fixtures."""
 
-from unittest.mock import AsyncMock
+from unittest.mock import AsyncMock, MagicMock
 
 import pytest
+
+from geoguessr_mcp.api.dynamic_response import DynamicResponse
+from geoguessr_mcp.models import RoundGuess, Game
+from geoguessr_mcp.services import AnalysisService, GameService, ProfileService
 
 
 @pytest.fixture(autouse=True)
@@ -12,12 +16,75 @@ def mock_env(monkeypatch):
 
 
 @pytest.fixture
+def mock_client():
+    """Create a mock GeoGuessrClient."""
+    client = MagicMock()
+    client.get = AsyncMock()
+    return client
+
+
+@pytest.fixture
 def mock_session():
     """Create a mock async HTTP session."""
     mock_client = AsyncMock()
     mock_client.__aenter__.return_value = mock_client
     mock_client.__aexit__.return_value = None
     return mock_client
+
+
+@pytest.fixture
+def mock_game_service():
+    """Create a mock GameService."""
+    service = MagicMock()
+    service.get_recent_games = AsyncMock()
+    service.get_season_stats = AsyncMock()
+    return service
+
+
+@pytest.fixture
+def mock_profile_service():
+    """Create a mock ProfileService."""
+    service = MagicMock()
+    service.get_comprehensive_profile = AsyncMock()
+    return service
+
+
+@pytest.fixture
+def analysis_service(mock_client, mock_game_service, mock_profile_service):
+    """Create AnalysisService with mocked dependencies."""
+    return AnalysisService(
+        mock_client,
+        game_service=mock_game_service,
+        profile_service=mock_profile_service,
+    )
+
+
+@pytest.fixture
+def game_service(mock_client):
+    """Create GameService with mocked client."""
+    return GameService(mock_client)
+
+
+@pytest.fixture
+def profile_service(mock_client):
+    """Create ProfileService with mocked client."""
+    return ProfileService(mock_client)
+
+
+@pytest.fixture
+def mock_dynamic_response():
+    """Create a mock DynamicResponse factory."""
+
+    def create_response(data, success=True, status_code=200):
+        response = MagicMock(spec=DynamicResponse)
+        response.data = data
+        response.is_success = success
+        response.status_code = status_code
+        response.available_fields = list(data.keys()) if isinstance(data, dict) else []
+        response.summarize.return_value = {"data_summary": data}
+        return response
+
+    return create_response
 
 
 @pytest.fixture
@@ -81,3 +148,53 @@ def mock_season_stats_data():
         "wins": 30,
         "tier": "Gold",
     }
+
+
+@pytest.fixture
+def mock_activity_feed_data():
+    """Activity feed response data."""
+    return {
+        "entries": [
+            {
+                "type": "PlayedGame",
+                "payload": {"gameToken": "game-token-1"},
+                "timestamp": "2024-01-15T10:00:00Z",
+            },
+            {
+                "type": "PlayedGame",
+                "payload": {"gameToken": "game-token-2"},
+                "timestamp": "2024-01-14T10:00:00Z",
+            },
+            {
+                "type": "Achievement",
+                "payload": {"achievementId": "ach-1"},
+                "timestamp": "2024-01-13T10:00:00Z",
+            },
+        ]
+    }
+
+
+@pytest.fixture
+def sample_games():
+    """Create sample Game objects for testing."""
+    games = []
+    for i in range(5):
+        rounds = [
+            RoundGuess(
+                round_number=j + 1,
+                score=5000 - (i * 200) - (j * 100),  # Varying scores
+                distance_meters=100.0 * (i + 1),
+                time_seconds=30 + i * 5,
+            )
+            for j in range(5)
+        ]
+        game = Game(
+            token=f"game-{i}",
+            map_name="World",
+            mode="standard",
+            total_score=sum(r.score for r in rounds),
+            rounds=rounds,
+            finished=True,
+        )
+        games.append(game)
+    return games

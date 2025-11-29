@@ -6,8 +6,8 @@ instances when interacting with API responses or performing operations like
 serialization. The tests cover both standard and edge cases.
 """
 
-from geoguessr_mcp.models.Game import Game
-from geoguessr_mcp.models.RoundGuess import RoundGuess
+from geoguessr_mcp.models.game import Game
+from geoguessr_mcp.models.round_guess import RoundGuess
 
 
 class TestGame:
