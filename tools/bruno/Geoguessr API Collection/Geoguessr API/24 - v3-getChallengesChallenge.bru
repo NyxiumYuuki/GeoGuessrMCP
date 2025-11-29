@@ -1,0 +1,22 @@
+meta {
+  name: 24 - v3/getChallengesChallenge
+  type: http
+  seq: 23
+}
+
+get {
+  url: {{GEOGUESSR_API_URL}}/v3/challenges/<challenge_token_here>
+  body: none
+  auth: apikey
+}
+
+auth:apikey {
+  key: Cookie
+  value: _ncfa={{GEOGUESSR_NCFA_COOKIE}}
+  placement: header
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}

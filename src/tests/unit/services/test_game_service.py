@@ -40,32 +40,23 @@ class TestGameService:
         """Test game details with explicit session token."""
         mock_client.get.return_value = mock_dynamic_response(mock_game_data)
 
-        game, response = await game_service.get_game_details(
-            "ABC123",
-            session_token="test_token"
-        )
+        game, response = await game_service.get_game_details("ABC123", session_token="test_token")
 
         call_args = mock_client.get.call_args
         assert call_args[0][1] == "test_token"
 
     @pytest.mark.asyncio
-    async def test_get_game_details_failure(
-            self, game_service, mock_client, mock_dynamic_response
-    ):
+    async def test_get_game_details_failure(self, game_service, mock_client, mock_dynamic_response):
         """Test game details retrieval failure."""
         mock_client.get.return_value = mock_dynamic_response(
-            {"error": "Game not found"},
-            success=False,
-            status_code=404
+            {"error": "Game not found"}, success=False, status_code=404
         )
 
         with pytest.raises(ValueError, match="Failed to get game details"):
             await game_service.get_game_details("INVALID")
 
     @pytest.mark.asyncio
-    async def test_get_unfinished_games(
-            self, game_service, mock_client, mock_dynamic_response
-    ):
+    async def test_get_unfinished_games(self, game_service, mock_client, mock_dynamic_response):
         """Test unfinished games retrieval."""
         unfinished_data = [
             {"token": "game-1", "map": {"name": "World"}},
@@ -79,9 +70,7 @@ class TestGameService:
         assert len(response.data) == 2
 
     @pytest.mark.asyncio
-    async def test_get_streak_game(
-            self, game_service, mock_client, mock_dynamic_response
-    ):
+    async def test_get_streak_game(self, game_service, mock_client, mock_dynamic_response):
         """Test streak game retrieval."""
         streak_data = {
             "token": "streak-123",
@@ -122,7 +111,12 @@ class TestGameService:
 
     @pytest.mark.asyncio
     async def test_get_recent_games_success(
-            self, game_service, mock_client, mock_activity_feed_data, mock_game_data, mock_dynamic_response
+            self,
+            game_service,
+            mock_client,
+            mock_activity_feed_data,
+            mock_game_data,
+            mock_dynamic_response,
     ):
         """Test recent games retrieval."""
         # First call returns activity feed, subsequent calls return game details
@@ -153,10 +147,7 @@ class TestGameService:
             self, game_service, mock_client, mock_dynamic_response
     ):
         """Test recent games when feed fails."""
-        mock_client.get.return_value = mock_dynamic_response(
-            {"error": "Failed"},
-            success=False
-        )
+        mock_client.get.return_value = mock_dynamic_response({"error": "Failed"}, success=False)
 
         games = await game_service.get_recent_games(count=5)
 
@@ -164,7 +155,12 @@ class TestGameService:
 
     @pytest.mark.asyncio
     async def test_get_recent_games_skips_failed_game_fetch(
-            self, game_service, mock_client, mock_activity_feed_data, mock_game_data, mock_dynamic_response
+            self,
+            game_service,
+            mock_client,
+            mock_activity_feed_data,
+            mock_game_data,
+            mock_dynamic_response,
     ):
         """Test that failed individual game fetches are skipped."""
         mock_client.get.side_effect = [
@@ -193,14 +189,10 @@ class TestGameService:
         assert stats.division == "Gold"
 
     @pytest.mark.asyncio
-    async def test_get_season_stats_failure(
-            self, game_service, mock_client, mock_dynamic_response
-    ):
+    async def test_get_season_stats_failure(self, game_service, mock_client, mock_dynamic_response):
         """Test season stats failure."""
         mock_client.get.return_value = mock_dynamic_response(
-            {"error": "No active season"},
-            success=False,
-            status_code=404
+            {"error": "No active season"}, success=False, status_code=404
         )
 
         with pytest.raises(ValueError, match="Failed to get season stats"):
@@ -246,18 +238,14 @@ class TestGameService:
     ):
         """Test daily challenge failure."""
         mock_client.get.return_value = mock_dynamic_response(
-            {"error": "Challenge not found"},
-            success=False,
-            status_code=404
+            {"error": "Challenge not found"}, success=False, status_code=404
         )
 
         with pytest.raises(ValueError, match="Failed to get daily challenge"):
             await game_service.get_daily_challenge()
 
     @pytest.mark.asyncio
-    async def test_get_battle_royale(
-            self, game_service, mock_client, mock_dynamic_response
-    ):
+    async def test_get_battle_royale(self, game_service, mock_client, mock_dynamic_response):
         """Test battle royale game retrieval."""
         br_data = {
             "gameId": "br-123",
@@ -272,9 +260,7 @@ class TestGameService:
         assert response.data["players"] == 10
 
     @pytest.mark.asyncio
-    async def test_get_duel(
-            self, game_service, mock_client, mock_dynamic_response
-    ):
+    async def test_get_duel(self, game_service, mock_client, mock_dynamic_response):
         """Test duel game retrieval."""
         duel_data = {
             "duelId": "duel-456",
@@ -289,9 +275,7 @@ class TestGameService:
         assert response.data["player1"]["score"] == 5000
 
     @pytest.mark.asyncio
-    async def test_get_tournaments(
-            self, game_service, mock_client, mock_dynamic_response
-    ):
+    async def test_get_tournaments(self, game_service, mock_client, mock_dynamic_response):
         """Test tournaments retrieval."""
         tournaments_data = [
             {"id": "t1", "name": "Weekly Tournament", "status": "active"},

@@ -1,0 +1,22 @@
+meta {
+  name: 23_2 - v3/getChallengesDailyChallengesPrevious
+  type: http
+  seq: 22
+}
+
+get {
+  url: {{GEOGUESSR_API_URL}}/v3/challenges/daily-challenges/previous
+  body: none
+  auth: apikey
+}
+
+auth:apikey {
+  key: Cookie
+  value: _ncfa={{GEOGUESSR_NCFA_COOKIE}}
+  placement: header
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}

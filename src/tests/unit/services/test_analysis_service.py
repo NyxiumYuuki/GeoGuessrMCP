@@ -103,7 +103,9 @@ class TestAnalysisService:
         games = []
         for i in range(6):
             base_score = 15000 + (i * 2000)  # Increasing scores
-            rounds = [RoundGuess(round_number=1, score=base_score, distance_meters=100, time_seconds=30)]
+            rounds = [
+                RoundGuess(round_number=1, score=base_score, distance_meters=100, time_seconds=30)
+            ]
             game = Game(
                 token=f"game-{i}",
                 map_name="World",
@@ -124,7 +126,9 @@ class TestAnalysisService:
         games = []
         for i in range(6):
             base_score = 25000 - (i * 2000)  # Decreasing scores
-            rounds = [RoundGuess(round_number=1, score=base_score, distance_meters=100, time_seconds=30)]
+            rounds = [
+                RoundGuess(round_number=1, score=base_score, distance_meters=100, time_seconds=30)
+            ]
             game = Game(
                 token=f"game-{i}",
                 map_name="World",
@@ -182,17 +186,11 @@ class TestAnalysisService:
         assert all(area["score"] >= 4500 for area in result.strong_areas)
 
     @pytest.mark.asyncio
-    async def test_analyze_recent_games(
-            self, analysis_service, mock_game_service, sample_games
-    ):
+    async def test_analyze_recent_games(self, analysis_service, mock_game_service, sample_games):
         """Test analyze_recent_games method."""
         mock_game_service.get_recent_games.return_value = sample_games
 
-        with patch.object(
-                analysis_service,
-                'analyze_games',
-                wraps=AnalysisService.analyze_games
-        ):
+        with patch.object(analysis_service, "analyze_games", wraps=AnalysisService.analyze_games):
             result = await analysis_service.analyze_recent_games(count=5)
 
         assert "analysis" in result
@@ -207,17 +205,20 @@ class TestAnalysisService:
         """Test analyze_recent_games with session token."""
         mock_game_service.get_recent_games.return_value = sample_games
 
-        await analysis_service.analyze_recent_games(
-            count=10,
-            session_token="test_token"
-        )
+        await analysis_service.analyze_recent_games(count=10, session_token="test_token")
 
         mock_game_service.get_recent_games.assert_called_once_with(10, "test_token")
 
     @pytest.mark.asyncio
     async def test_get_performance_summary(
-            self, analysis_service, mock_game_service, mock_profile_service,
-            mock_client, sample_games, mock_season_stats_data, mock_dynamic_response
+            self,
+            analysis_service,
+            mock_game_service,
+            mock_profile_service,
+            mock_client,
+            sample_games,
+            mock_season_stats_data,
+            mock_dynamic_response,
     ):
         """Test comprehensive performance summary."""
         mock_profile_service.get_comprehensive_profile.return_value = {
@@ -227,6 +228,7 @@ class TestAnalysisService:
 
         mock_season_response = mock_dynamic_response(mock_season_stats_data)
         from geoguessr_mcp.models import SeasonStats
+
         mock_season_stats = SeasonStats.from_api_response(mock_season_stats_data)
         mock_game_service.get_season_stats.return_value = (mock_season_stats, mock_season_response)
         mock_game_service.get_recent_games.return_value = sample_games[:3]
@@ -267,7 +269,14 @@ class TestAnalysisService:
             for i in range(5)
         ]
         games = [
-            Game(token="g1", map_name="World", mode="standard", total_score=15000, rounds=rounds, finished=True)
+            Game(
+                token="g1",
+                map_name="World",
+                mode="standard",
+                total_score=15000,
+                rounds=rounds,
+                finished=True,
+            )
             for _ in range(5)
         ]
         mock_game_service.get_recent_games.return_value = games
@@ -289,7 +298,14 @@ class TestAnalysisService:
             for i in range(5)
         ]
         games = [
-            Game(token="g1", map_name="World", mode="standard", total_score=17500, rounds=rounds, finished=True)
+            Game(
+                token="g1",
+                map_name="World",
+                mode="standard",
+                total_score=17500,
+                rounds=rounds,
+                finished=True,
+            )
             for _ in range(5)
         ]
         mock_game_service.get_recent_games.return_value = games
@@ -308,7 +324,9 @@ class TestAnalysisService:
         games = []
         for i in range(6):
             base_score = 25000 - (i * 3000)
-            rounds = [RoundGuess(round_number=1, score=base_score, distance_meters=100, time_seconds=45)]
+            rounds = [
+                RoundGuess(round_number=1, score=base_score, distance_meters=100, time_seconds=45)
+            ]
             game = Game(
                 token=f"game-{i}",
                 map_name="World",

@@ -1,4 +1,5 @@
 """Shared test fixtures."""
+
 import os
 from unittest.mock import AsyncMock, MagicMock, patch
 
@@ -16,7 +17,7 @@ from geoguessr_mcp.services import AnalysisService, GameService, ProfileService
 def mock_env(request, monkeypatch):
     """Set up environment variables for testing."""
     # Skip this fixture if the test has the 'real_env' marker
-    if 'real_env' in request.keywords:
+    if "real_env" in request.keywords:
         yield
         return
 
@@ -25,6 +26,7 @@ def mock_env(request, monkeypatch):
 
     # Clear schema registry to avoid interference from registered schemas
     from geoguessr_mcp.monitoring.schema.schema_registry import schema_registry
+
     # Store original schemas
     original_schemas = schema_registry.schemas.copy()
     # Clear all schemas for testing
