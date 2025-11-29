@@ -11,14 +11,14 @@ from geoguessr_mcp.models import UserProfile
 class TestUserProfile:
     """Tests for UserProfile model."""
 
-    def test_from_api_response(self, mock_profile_response):
+    def test_from_api_response(self, mock_profile_data):
         """Test creating profile from API response."""
-        profile = UserProfile.from_api_response(mock_profile_response)
+        profile = UserProfile.from_api_response(mock_profile_data)
 
-        assert profile.id == "test-user-id-123"
+        assert profile.id == "test-user-id"
         assert profile.nick == "TestPlayer"
         assert profile.email == "test@example.com"
-        assert profile.country == "US"
+        assert profile.country == "FR"
         assert profile.level == 50
         assert profile.is_verified is True
         assert profile.is_pro is True
@@ -33,11 +33,11 @@ class TestUserProfile:
         assert profile.email == ""
         assert profile.level == 0
 
-    def test_to_dict(self, mock_profile_response):
+    def test_to_dict(self, mock_profile_data):
         """Test serializing profile to dict."""
-        profile = UserProfile.from_api_response(mock_profile_response)
+        profile = UserProfile.from_api_response(mock_profile_data)
         result = profile.to_dict()
 
-        assert result["id"] == "test-user-id-123"
+        assert result["id"] == "test-user-id"
         assert result["nick"] == "TestPlayer"
         assert "raw_data" not in result

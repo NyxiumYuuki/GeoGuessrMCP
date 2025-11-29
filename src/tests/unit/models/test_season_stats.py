@@ -16,9 +16,9 @@ from geoguessr_mcp.models import SeasonStats
 class TestSeasonStats:
     """Tests for SeasonStats model."""
 
-    def test_from_api_response(self, mock_season_stats_response):
+    def test_from_api_response(self, mock_season_stats_data):
         """Test creating season stats from API response."""
-        stats = SeasonStats.from_api_response(mock_season_stats_response)
+        stats = SeasonStats.from_api_response(mock_season_stats_data)
 
         assert stats.season_id == "season-2024-1"
         assert stats.season_name == "Season 1 2024"

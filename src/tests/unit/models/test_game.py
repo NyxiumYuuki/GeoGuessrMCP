@@ -13,11 +13,11 @@ from geoguessr_mcp.models.RoundGuess import RoundGuess
 class TestGame:
     """Tests for Game model."""
 
-    def test_from_api_response(self, mock_game_response):
+    def test_from_api_response(self, mock_game_data):
         """Test creating game from API response."""
-        game = Game.from_api_response(mock_game_response)
+        game = Game.from_api_response(mock_game_data)
 
-        assert game.token == "ABC123XYZ"
+        assert game.token == "ABC123"
         assert game.map_name == "World"
         assert game.mode == "standard"
         assert game.finished is True
@@ -52,11 +52,11 @@ class TestGame:
         assert guess.distance_meters == 150.5
         assert guess.time_seconds == 25
 
-    def test_to_dict(self, mock_game_response):
+    def test_to_dict(self, mock_game_data):
         """Test serializing game to dict."""
-        game = Game.from_api_response(mock_game_response)
+        game = Game.from_api_response(mock_game_data)
         result = game.to_dict()
 
-        assert result["token"] == "ABC123XYZ"
+        assert result["token"] == "ABC123"
         assert len(result["rounds"]) == 5
         assert result["total_score"] > 0

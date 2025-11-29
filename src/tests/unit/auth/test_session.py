@@ -78,7 +78,7 @@ class TestSessionManager:
     """Tests for SessionManager."""
 
     @pytest.mark.asyncio
-    async def test_login_success(self, mock_profile_response):
+    async def test_login_success(self, mock_profile_data):
         """Test successful login flow."""
         manager = SessionManager()
 
@@ -101,7 +101,7 @@ class TestSessionManager:
             # Mock profile response
             profile_response = MagicMock()
             profile_response.status_code = 200
-            profile_response.json.return_value = mock_profile_response
+            profile_response.json.return_value = mock_profile_data
 
             mock_client.post = AsyncMock(return_value=login_response)
             mock_client.get = AsyncMock(return_value=profile_response)
@@ -113,7 +113,7 @@ class TestSessionManager:
             assert session_token is not None
             assert len(session_token) > 0
             assert session.ncfa_cookie == "test_ncfa_cookie_value"
-            assert session.user_id == "test-user-id-123"
+            assert session.user_id == "test-user-id"
             assert session.username == "TestPlayer"
             assert session.is_valid()
 
@@ -154,7 +154,7 @@ class TestSessionManager:
                 await manager.login("test@example.com", "password")
 
     @pytest.mark.asyncio
-    async def test_logout(self, mock_profile_response):
+    async def test_logout(self, mock_profile_data):
         """Test logout functionality."""
         manager = SessionManager()
 
@@ -174,7 +174,7 @@ class TestSessionManager:
 
             profile_response = MagicMock()
             profile_response.status_code = 200
-            profile_response.json.return_value = mock_profile_response
+            profile_response.json.return_value = mock_profile_data
 
             mock_client.post = AsyncMock(return_value=login_response)
             mock_client.get = AsyncMock(return_value=profile_response)

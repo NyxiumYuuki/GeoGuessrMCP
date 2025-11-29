@@ -10,10 +10,10 @@ from typing import Any, Optional
 
 import httpx
 
+from .endpoints import EndpointInfo
 from ..auth.session import SessionManager
 from ..config import settings
-from ..monitoring.schema_manager import schema_registry
-from .endpoints import EndpointInfo
+from ..monitoring.schema.SchemaRegistry import schema_registry
 
 logger = logging.getLogger(__name__)
 
