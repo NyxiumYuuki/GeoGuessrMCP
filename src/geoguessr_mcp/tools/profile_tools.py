@@ -87,7 +87,9 @@ def register_profile_tools(mcp: FastMCP, profile_service: ProfileService):
                 "total": len(achievements),
                 "unlocked": len(unlocked),
                 "locked": len(locked),
-                "completion_rate": f"{len(unlocked) / len(achievements) * 100:.1f}%" if achievements else "0%",
+                "completion_rate": (
+                    f"{len(unlocked) / len(achievements) * 100:.1f}%" if achievements else "0%"
+                ),
             },
             "unlocked_achievements": [
                 {"name": a.name, "description": a.description, "unlocked_at": a.unlocked_at}

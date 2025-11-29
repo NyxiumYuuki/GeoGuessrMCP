@@ -304,6 +304,7 @@ class TestGeoGuessrClientIntegration:
         """Test real API call to profile endpoint."""
         # This test requires GEOGUESSR_NCFA_COOKIE to be set
         import os
+
         if not os.environ.get("GEOGUESSR_NCFA_COOKIE"):
             pytest.skip("GEOGUESSR_NCFA_COOKIE not set")
 
@@ -317,6 +318,7 @@ class TestGeoGuessrClientIntegration:
         """Test real API call to stats' endpoint."""
         # This test requires GEOGUESSR_NCFA_COOKIE to be set
         import os
+
         if not os.environ.get("GEOGUESSR_NCFA_COOKIE"):
             pytest.skip("GEOGUESSR_NCFA_COOKIE not set")
 

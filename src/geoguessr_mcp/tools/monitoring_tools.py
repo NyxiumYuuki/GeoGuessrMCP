@@ -36,6 +36,7 @@ def register_monitoring_tools(mcp: FastMCP):
         session_token = get_current_session_token()
         if session_token:
             from ..auth.session import SessionManager
+
             session_manager = SessionManager()
             session = await session_manager.get_session(session_token)
             if session:
@@ -136,14 +137,16 @@ def register_monitoring_tools(mcp: FastMCP):
                 previous = history[-1] if history else None
 
                 if current and previous:
-                    changes.append({
-                        "endpoint": endpoint,
-                        "current_hash": current.schema_hash,
-                        "previous_hash": previous.schema_hash,
-                        "current_fields": len(current.fields),
-                        "previous_fields": len(previous.fields),
-                        "changed_at": current.last_updated.isoformat(),
-                    })
+                    changes.append(
+                        {
+                            "endpoint": endpoint,
+                            "current_hash": current.schema_hash,
+                            "previous_hash": previous.schema_hash,
+                            "current_fields": len(current.fields),
+                            "previous_fields": len(previous.fields),
+                            "changed_at": current.last_updated.isoformat(),
+                        }
+                    )
 
         return {
             "total_changes_tracked": len(changes),

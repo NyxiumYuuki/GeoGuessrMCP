@@ -74,9 +74,7 @@ def register_game_tools(mcp: FastMCP, game_service: GameService):
             "success": True,
             "total_entries": len(entries),
             "entry_types": list(categorized.keys()),
-            "entries_by_type": {
-                t: len(e) for t, e in categorized.items()
-            },
+            "entries_by_type": {t: len(e) for t, e in categorized.items()},
             "recent_entries": entries[:5],  # First 5 for context
             "available_fields": response.available_fields,
         }

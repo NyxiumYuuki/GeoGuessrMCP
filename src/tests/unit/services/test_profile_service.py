@@ -46,14 +46,10 @@ class TestProfileService:
         assert call_args[0][1] == "test_token"
 
     @pytest.mark.asyncio
-    async def test_get_profile_failure(
-            self, profile_service, mock_client, mock_dynamic_response
-    ):
+    async def test_get_profile_failure(self, profile_service, mock_client, mock_dynamic_response):
         """Test profile retrieval failure."""
         mock_client.get.return_value = mock_dynamic_response(
-            {"error": "Unauthorized"},
-            success=False,
-            status_code=401
+            {"error": "Unauthorized"}, success=False, status_code=401
         )
 
         with pytest.raises(ValueError, match="Failed to get profile"):
@@ -75,23 +71,17 @@ class TestProfileService:
         assert stats.win_rate == 0.65
 
     @pytest.mark.asyncio
-    async def test_get_stats_failure(
-            self, profile_service, mock_client, mock_dynamic_response
-    ):
+    async def test_get_stats_failure(self, profile_service, mock_client, mock_dynamic_response):
         """Test stats retrieval failure."""
         mock_client.get.return_value = mock_dynamic_response(
-            {"error": "Server error"},
-            success=False,
-            status_code=500
+            {"error": "Server error"}, success=False, status_code=500
         )
 
         with pytest.raises(ValueError, match="Failed to get stats"):
             await profile_service.get_stats()
 
     @pytest.mark.asyncio
-    async def test_get_extended_stats(
-            self, profile_service, mock_client, mock_dynamic_response
-    ):
+    async def test_get_extended_stats(self, profile_service, mock_client, mock_dynamic_response):
         """Test extended stats retrieval."""
         extended_data = {
             "totalDistance": 1500000,
@@ -154,9 +144,7 @@ class TestProfileService:
         assert achievements[0].name == "Winner"
 
     @pytest.mark.asyncio
-    async def test_get_public_profile(
-            self, profile_service, mock_client, mock_dynamic_response
-    ):
+    async def test_get_public_profile(self, profile_service, mock_client, mock_dynamic_response):
         """Test public profile retrieval."""
         public_profile_data = {
             "id": "other-user-123",
@@ -172,9 +160,7 @@ class TestProfileService:
         assert profile.nick == "OtherPlayer"
 
     @pytest.mark.asyncio
-    async def test_get_user_maps(
-            self, profile_service, mock_client, mock_dynamic_response
-    ):
+    async def test_get_user_maps(self, profile_service, mock_client, mock_dynamic_response):
         """Test user maps retrieval."""
         maps_data = [
             {"id": "map-1", "name": "My Custom Map"},
@@ -189,7 +175,12 @@ class TestProfileService:
 
     @pytest.mark.asyncio
     async def test_get_comprehensive_profile_success(
-            self, profile_service, mock_client, mock_profile_data, mock_stats_data, mock_dynamic_response
+            self,
+            profile_service,
+            mock_client,
+            mock_profile_data,
+            mock_stats_data,
+            mock_dynamic_response,
     ):
         """Test comprehensive profile aggregation."""
         # Setup mock responses for each call
@@ -197,9 +188,11 @@ class TestProfileService:
             mock_dynamic_response(mock_profile_data),  # profile
             mock_dynamic_response(mock_stats_data),  # stats
             mock_dynamic_response({"totalDistance": 1000}),  # extended stats
-            mock_dynamic_response([  # achievements
-                {"id": "ach-1", "name": "Test", "unlocked": True, "unlockedAt": "2024-01-01"},
-            ]),
+            mock_dynamic_response(
+                [  # achievements
+                    {"id": "ach-1", "name": "Test", "unlocked": True, "unlockedAt": "2024-01-01"},
+                ]
+            ),
         ]
 
         result = await profile_service.get_comprehensive_profile()
