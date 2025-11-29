@@ -1,5 +1,3 @@
-version: '3.8'
-
 # Production deployment with Nginx reverse proxy and SSL support
 
 services:

@@ -1,15 +1,11 @@
-version: '3.8'
-
 services:
   geoguessr-mcp:
     # Option 1: Build locally
     build:
       context: .
       dockerfile: Dockerfile
-
     # Option 2: Use pre-built image from Docker Hub (uncomment to use)
     # image: ${DOCKER_USERNAME:-yourusername}/geoguessr-mcp:${IMAGE_TAG:-latest}
-
     container_name: geoguessr-mcp-server
     restart: unless-stopped
     ports:
@@ -17,24 +13,21 @@ services:
     environment:
       # GeoGuessr Authentication (optional - can use login tool instead)
       - GEOGUESSR_NCFA_COOKIE=${GEOGUESSR_NCFA_COOKIE:-}
-
       # MCP Server configuration
       - MCP_TRANSPORT=${MCP_TRANSPORT:-streamable-http}
-      - MCP_HOST=0.0.0.0
-      - MCP_PORT=8000
-
+      - MCP_HOST=${MCP_HOST:-0.0.0.0}
+      - MCP_PORT=${MCP_PORT:-8000}  # Use the same variable as in ports
       # Monitoring configuration
       - MONITORING_ENABLED=${MONITORING_ENABLED:-true}
       - MONITORING_INTERVAL_HOURS=${MONITORING_INTERVAL_HOURS:-24}
-      - SCHEMA_CACHE_DIR=/app/data/schemas
-
+      - SCHEMA_CACHE_DIR=${SCHEMA_CACHE_DIR:-/app/data/schemas}
       # Logging
       - LOG_LEVEL=${LOG_LEVEL:-INFO}
     volumes:
       # Persist schema cache between restarts
-      - geoguessr-schemas:/app/data/schemas
+      - geoguessr-schemas:${SCHEMA_CACHE_DIR:-/app/data/schemas}
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      test: [ "CMD", "curl", "-f", "http://localhost:${MCP_PORT:-8000}/health" ]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -44,11 +37,14 @@ services:
       options:
         max-size: "10m"
         max-file: "3"
+    networks:
+      - geoguessr-mcp-network
 
 volumes:
   geoguessr-schemas:
     name: geoguessr-mcp-schemas
 
 networks:
-  default:
+  geoguessr-mcp-network:
     name: geoguessr-mcp-network
+    driver: bridge

@@ -8,12 +8,10 @@ __pycache__/
 dist/
 build/
 *.egg
-
-# Virtual environments
+.venv/
 venv/
 env/
 ENV/
-.venv
 
 # IDE
 .vscode/
@@ -26,11 +24,6 @@ ENV/
 .git/
 .gitignore
 .gitattributes
-
-# Documentation
-*.md
-!pyproject.toml
-docs/
 
 # Tests
 tests/
@@ -45,11 +38,6 @@ htmlcov/
 .gitlab-ci.yml
 .travis.yml
 
-# Environment
-.env
-.env.local
-.env.*.local
-
 # Logs
 *.log
 
@@ -57,14 +45,10 @@ htmlcov/
 .DS_Store
 Thumbs.db
 
-# Docker
-Dockerfile*
-docker-compose*.yml
-.dockerignore
+# Local environment files (keep .env.example if it exists)
+.env.local
+.env.*.local
 
-# Nginx
-nginx/
-
-# Data directories (will be mounted as volumes)
+# Data directories (will be mounted as volumes in Docker)
 data/
 schemas/

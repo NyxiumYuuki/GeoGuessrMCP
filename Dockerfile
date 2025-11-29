@@ -17,14 +17,14 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 # Install uv for faster package installation
 RUN pip install --no-cache-dir uv
 
-# Copy only dependency files for better layer caching
-COPY pyproject.toml .
+# Copy only the files needed for dependency installation
+COPY README.md pyproject.toml ./
 
-# Install Python dependencies from pyproject.toml
-RUN uv pip install --system --no-cache -e .
+# Install Python dependencies
+RUN uv pip install --system --no-cache .
 
-# Copy application source code
-COPY src/ ./src/
+# Copy the rest of the application
+COPY . .
 
 # Create data directory for schema cache
 RUN mkdir -p /app/data/schemas
