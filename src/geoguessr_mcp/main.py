@@ -7,8 +7,11 @@ with automatic API monitoring and dynamic schema adaptation.
 
 import logging
 import sys
+from typing import Any
 
 from mcp.server.fastmcp import FastMCP
+from starlette.applications import Starlette
+from starlette.middleware import Middleware
 
 from .config import settings
 from .middleware import AuthenticationMiddleware
@@ -59,11 +62,81 @@ mcp = FastMCP(
 # Register all tools
 services = register_all_tools(mcp)
 
-# Add authentication middleware if needed
+# Setup authentication middleware if enabled
 if settings.MCP_AUTH_ENABLED:
-    logger.info("Registering authentication middleware")
-    # Add middleware to the underlying ASGI app
-    mcp.app.add_middleware(AuthenticationMiddleware)
+    logger.info("Setting up authentication middleware")
+
+    # Create a function to add middleware to the app
+    def add_middleware_to_app(app):
+        """Add authentication middleware to a Starlette app."""
+        if app is not None:
+            try:
+                app.add_middleware(AuthenticationMiddleware)
+                logger.info("Authentication middleware successfully added")
+                return True
+            except Exception as e:
+                logger.error(f"Failed to add middleware: {e}")
+        return False
+
+    # Try to add middleware immediately to any existing app
+    middleware_added = False
+
+    # Try different possible locations where FastMCP might store the app
+    for attr_path in [
+        "mcp._transport.app",
+        "mcp.sse.app",
+        "mcp.http_server.app",
+        "mcp._http_server.app",
+        "mcp._app",
+        "mcp._asgi_app",
+    ]:
+        try:
+            parts = attr_path.split(".")
+            obj = mcp
+            for part in parts[1:]:  # Skip 'mcp' itself
+                obj = getattr(obj, part, None)
+                if obj is None:
+                    break
+
+            if obj is not None and add_middleware_to_app(obj):
+                middleware_added = True
+                break
+        except (AttributeError, TypeError):
+            continue
+
+    if not middleware_added:
+        # If we couldn't add it immediately, wrap the run method
+        logger.info("Deferring middleware addition until server starts")
+
+        _original_run = mcp.run
+
+        def run_with_middleware_wrapper(*args, **kwargs):
+            """Wrapper to try adding middleware when run() is called."""
+            # Try again when run is called
+            for attr_path in [
+                "mcp._transport.app",
+                "mcp.sse.app",
+                "mcp.http_server.app",
+                "mcp._http_server.app",
+                "mcp._app",
+                "mcp._asgi_app",
+            ]:
+                try:
+                    parts = attr_path.split(".")
+                    obj = mcp
+                    for part in parts[1:]:
+                        obj = getattr(obj, part, None)
+                        if obj is None:
+                            break
+
+                    if obj is not None and add_middleware_to_app(obj):
+                        break
+                except (AttributeError, TypeError):
+                    continue
+
+            return _original_run(*args, **kwargs)
+
+        mcp.run = run_with_middleware_wrapper
 
 
 async def start_background_tasks():
@@ -96,7 +169,8 @@ def main():
         logger.info("Default GeoGuessr authentication cookie configured from environment")
     else:
         logger.warning(
-            "No default GeoGuessr authentication cookie set. " "Users will need to login or provide a cookie."
+            "No default GeoGuessr authentication cookie set. "
+            "Users will need to login or provide a cookie."
         )
 
     # Run the server

@@ -25,11 +25,11 @@ class DynamicResponse:
     """
 
     def __init__(
-            self,
-            data: Any,
-            endpoint: str,
-            status_code: int,
-            response_time_ms: float,
+        self,
+        data: Any,
+        endpoint: str,
+        status_code: int,
+        response_time_ms: float,
     ):
         self.data = data
         self.endpoint = endpoint

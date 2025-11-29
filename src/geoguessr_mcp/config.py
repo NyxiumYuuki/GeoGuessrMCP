@@ -37,9 +37,7 @@ class Settings:
     MCP_AUTH_ENABLED: bool = field(
         default_factory=lambda: os.getenv("MCP_AUTH_ENABLED", "false").lower() == "true"
     )
-    MCP_API_KEYS: Optional[str] = field(
-        default_factory=lambda: os.getenv("MCP_API_KEYS")
-    )
+    MCP_API_KEYS: Optional[str] = field(default_factory=lambda: os.getenv("MCP_API_KEYS"))
 
     # Logging Configuration
     LOG_LEVEL: str = field(default_factory=lambda: os.getenv("LOG_LEVEL", "INFO"))

@@ -200,7 +200,7 @@ class TestAnalysisService:
 
     @pytest.mark.asyncio
     async def test_analyze_recent_games_with_session(
-            self, analysis_service, mock_game_service, sample_games
+        self, analysis_service, mock_game_service, sample_games
     ):
         """Test analyze_recent_games with session token."""
         mock_game_service.get_recent_games.return_value = sample_games
@@ -211,14 +211,14 @@ class TestAnalysisService:
 
     @pytest.mark.asyncio
     async def test_get_performance_summary(
-            self,
-            analysis_service,
-            mock_game_service,
-            mock_profile_service,
-            mock_client,
-            sample_games,
-            mock_season_stats_data,
-            mock_dynamic_response,
+        self,
+        analysis_service,
+        mock_game_service,
+        mock_profile_service,
+        mock_client,
+        sample_games,
+        mock_season_stats_data,
+        mock_dynamic_response,
     ):
         """Test comprehensive performance summary."""
         mock_profile_service.get_comprehensive_profile.return_value = {
@@ -244,7 +244,7 @@ class TestAnalysisService:
 
     @pytest.mark.asyncio
     async def test_get_performance_summary_with_errors(
-            self, analysis_service, mock_game_service, mock_profile_service, mock_client
+        self, analysis_service, mock_game_service, mock_profile_service, mock_client
     ):
         """Test performance summary handles errors gracefully."""
         mock_profile_service.get_comprehensive_profile.side_effect = Exception("Profile error")
@@ -260,7 +260,7 @@ class TestAnalysisService:
 
     @pytest.mark.asyncio
     async def test_get_strategy_recommendations_low_perfect_rate(
-            self, analysis_service, mock_game_service
+        self, analysis_service, mock_game_service
     ):
         """Test strategy recommendations for low perfect round rate."""
         # Create games with no perfect rounds
@@ -289,7 +289,7 @@ class TestAnalysisService:
 
     @pytest.mark.asyncio
     async def test_get_strategy_recommendations_fast_play(
-            self, analysis_service, mock_game_service
+        self, analysis_service, mock_game_service
     ):
         """Test strategy recommendations for fast play style."""
         # Create games with very short time
@@ -317,7 +317,7 @@ class TestAnalysisService:
 
     @pytest.mark.asyncio
     async def test_get_strategy_recommendations_declining_trend(
-            self, analysis_service, mock_game_service
+        self, analysis_service, mock_game_service
     ):
         """Test strategy recommendations for declining performance."""
         # Create games with declining scores
@@ -346,7 +346,7 @@ class TestAnalysisService:
 
     @pytest.mark.asyncio
     async def test_get_strategy_recommendations_many_weak_areas(
-            self, analysis_service, mock_game_service
+        self, analysis_service, mock_game_service
     ):
         """Test strategy recommendations for many weak rounds."""
         # Create games with many low scores

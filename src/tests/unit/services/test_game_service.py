@@ -19,7 +19,7 @@ class TestGameService:
 
     @pytest.mark.asyncio
     async def test_get_game_details_success(
-            self, game_service, mock_client, mock_game_data, mock_dynamic_response
+        self, game_service, mock_client, mock_game_data, mock_dynamic_response
     ):
         """Test successful game details retrieval."""
         mock_client.get.return_value = mock_dynamic_response(mock_game_data)
@@ -35,7 +35,7 @@ class TestGameService:
 
     @pytest.mark.asyncio
     async def test_get_game_details_with_session_token(
-            self, game_service, mock_client, mock_game_data, mock_dynamic_response
+        self, game_service, mock_client, mock_game_data, mock_dynamic_response
     ):
         """Test game details with explicit session token."""
         mock_client.get.return_value = mock_dynamic_response(mock_game_data)
@@ -86,7 +86,7 @@ class TestGameService:
 
     @pytest.mark.asyncio
     async def test_get_activity_feed(
-            self, game_service, mock_client, mock_activity_feed_data, mock_dynamic_response
+        self, game_service, mock_client, mock_activity_feed_data, mock_dynamic_response
     ):
         """Test activity feed retrieval."""
         mock_client.get.return_value = mock_dynamic_response(mock_activity_feed_data)
@@ -98,7 +98,7 @@ class TestGameService:
 
     @pytest.mark.asyncio
     async def test_get_activity_feed_pagination(
-            self, game_service, mock_client, mock_dynamic_response
+        self, game_service, mock_client, mock_dynamic_response
     ):
         """Test activity feed with pagination."""
         page_2_data = {"entries": [{"type": "PlayedGame", "payload": {"gameToken": "old-game"}}]}
@@ -111,12 +111,12 @@ class TestGameService:
 
     @pytest.mark.asyncio
     async def test_get_recent_games_success(
-            self,
-            game_service,
-            mock_client,
-            mock_activity_feed_data,
-            mock_game_data,
-            mock_dynamic_response,
+        self,
+        game_service,
+        mock_client,
+        mock_activity_feed_data,
+        mock_game_data,
+        mock_dynamic_response,
     ):
         """Test recent games retrieval."""
         # First call returns activity feed, subsequent calls return game details
@@ -133,7 +133,7 @@ class TestGameService:
 
     @pytest.mark.asyncio
     async def test_get_recent_games_empty_feed(
-            self, game_service, mock_client, mock_dynamic_response
+        self, game_service, mock_client, mock_dynamic_response
     ):
         """Test recent games with empty activity feed."""
         mock_client.get.return_value = mock_dynamic_response({"entries": []})
@@ -144,7 +144,7 @@ class TestGameService:
 
     @pytest.mark.asyncio
     async def test_get_recent_games_feed_failure(
-            self, game_service, mock_client, mock_dynamic_response
+        self, game_service, mock_client, mock_dynamic_response
     ):
         """Test recent games when feed fails."""
         mock_client.get.return_value = mock_dynamic_response({"error": "Failed"}, success=False)
@@ -155,12 +155,12 @@ class TestGameService:
 
     @pytest.mark.asyncio
     async def test_get_recent_games_skips_failed_game_fetch(
-            self,
-            game_service,
-            mock_client,
-            mock_activity_feed_data,
-            mock_game_data,
-            mock_dynamic_response,
+        self,
+        game_service,
+        mock_client,
+        mock_activity_feed_data,
+        mock_game_data,
+        mock_dynamic_response,
     ):
         """Test that failed individual game fetches are skipped."""
         mock_client.get.side_effect = [
@@ -175,7 +175,7 @@ class TestGameService:
 
     @pytest.mark.asyncio
     async def test_get_season_stats_success(
-            self, game_service, mock_client, mock_season_stats_data, mock_dynamic_response
+        self, game_service, mock_client, mock_season_stats_data, mock_dynamic_response
     ):
         """Test season stats retrieval."""
         mock_client.get.return_value = mock_dynamic_response(mock_season_stats_data)
@@ -200,7 +200,7 @@ class TestGameService:
 
     @pytest.mark.asyncio
     async def test_get_daily_challenge_today(
-            self, game_service, mock_client, mock_dynamic_response
+        self, game_service, mock_client, mock_dynamic_response
     ):
         """Test daily challenge retrieval for today."""
         challenge_data = {
@@ -219,7 +219,7 @@ class TestGameService:
 
     @pytest.mark.asyncio
     async def test_get_daily_challenge_specific_day(
-            self, game_service, mock_client, mock_dynamic_response
+        self, game_service, mock_client, mock_dynamic_response
     ):
         """Test daily challenge for specific day."""
         challenge_data = {
@@ -234,7 +234,7 @@ class TestGameService:
 
     @pytest.mark.asyncio
     async def test_get_daily_challenge_failure(
-            self, game_service, mock_client, mock_dynamic_response
+        self, game_service, mock_client, mock_dynamic_response
     ):
         """Test daily challenge failure."""
         mock_client.get.return_value = mock_dynamic_response(

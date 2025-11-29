@@ -63,9 +63,9 @@ class AuthenticationMiddleware(BaseHTTPMiddleware):
                 status_code=401,
                 content={
                     "error": "Unauthorized",
-                    "message": "Missing Authorization header. Use 'Authorization: Bearer YOUR_API_KEY'"
+                    "message": "Missing Authorization header. Use 'Authorization: Bearer YOUR_API_KEY'",
                 },
-                headers={"WWW-Authenticate": "Bearer"}
+                headers={"WWW-Authenticate": "Bearer"},
             )
 
         # Parse Bearer token
@@ -76,9 +76,9 @@ class AuthenticationMiddleware(BaseHTTPMiddleware):
                 status_code=401,
                 content={
                     "error": "Unauthorized",
-                    "message": "Invalid Authorization header format. Use 'Authorization: Bearer YOUR_API_KEY'"
+                    "message": "Invalid Authorization header format. Use 'Authorization: Bearer YOUR_API_KEY'",
                 },
-                headers={"WWW-Authenticate": "Bearer"}
+                headers={"WWW-Authenticate": "Bearer"},
             )
 
         token = parts[1]
@@ -88,15 +88,14 @@ class AuthenticationMiddleware(BaseHTTPMiddleware):
             logger.warning(f"Invalid API key attempt from {request.client.host}")
             return JSONResponse(
                 status_code=403,
-                content={
-                    "error": "Forbidden",
-                    "message": "Invalid API key"
-                },
-                headers={"WWW-Authenticate": "Bearer"}
+                content={"error": "Forbidden", "message": "Invalid API key"},
+                headers={"WWW-Authenticate": "Bearer"},
             )
 
         # Authentication successful
-        logger.debug(f"Authenticated request from {request.client.host} with API key {token[:8]}...")
+        logger.debug(
+            f"Authenticated request from {request.client.host} with API key {token[:8]}..."
+        )
 
         # Get or create user context for this API key
         user_context = await multi_user_session_manager.get_user_context(token)

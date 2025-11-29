@@ -131,7 +131,7 @@ class TestAuthenticationFlow:
 
     @pytest.mark.asyncio
     async def test_session_replacement_same_user(
-            self, session_manager, mock_httpx_client, mock_profile_data
+        self, session_manager, mock_httpx_client, mock_profile_data
     ):
         """Test that logging in as same user replaces old session."""
         login_response = MagicMock()

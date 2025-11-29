@@ -64,9 +64,7 @@ class MultiUserSessionManager:
 
         return context
 
-    async def login_user(
-        self, api_key: str, email: str, password: str
-    ) -> tuple[str, UserSession]:
+    async def login_user(self, api_key: str, email: str, password: str) -> tuple[str, UserSession]:
         """
         Login a specific user (API key) to their GeoGuessr account.
 
@@ -90,9 +88,7 @@ class MultiUserSessionManager:
         # Perform login
         session_token, session = await manager.login(email, password)
 
-        logger.info(
-            f"User {session.username} logged in successfully for API key {api_key[:8]}..."
-        )
+        logger.info(f"User {session.username} logged in successfully for API key {api_key[:8]}...")
 
         return session_token, session
 

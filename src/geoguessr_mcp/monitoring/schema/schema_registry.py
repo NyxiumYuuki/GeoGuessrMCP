@@ -12,6 +12,7 @@ Classes:
 
 import json
 import logging
+import tempfile
 from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any, Optional
@@ -33,7 +34,20 @@ class SchemaRegistry:
 
     def __init__(self, cache_dir: Optional[str] = None):
         self.cache_dir = Path(cache_dir or settings.SCHEMA_CACHE_DIR)
-        self.cache_dir.mkdir(parents=True, exist_ok=True)
+
+        # Try to create the cache directory, fall back to temp if permission denied
+        try:
+            self.cache_dir.mkdir(parents=True, exist_ok=True)
+        except (PermissionError, OSError) as e:
+            logger.warning(
+                f"Cannot create schema cache directory at {self.cache_dir}: {e}. "
+                f"Using temporary directory instead."
+            )
+            # Use a temporary directory that will be cleaned up
+            temp_dir = tempfile.mkdtemp(prefix="geoguessr_schema_")
+            self.cache_dir = Path(temp_dir)
+            logger.info(f"Using temporary schema cache directory: {self.cache_dir}")
+
         self.schemas: dict[str, EndpointSchema] = {}
         self.schema_history: dict[str, list[EndpointSchema]] = {}
         self.detector = SchemaDetector()
