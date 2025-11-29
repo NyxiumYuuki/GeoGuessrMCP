@@ -166,7 +166,45 @@ Claude uses explore_endpoint tool:
 
 ## 🏭 Production Deployment
 
-### With SSL (Recommended)
+### Method 1: Build and Push Docker Image
+
+For VPS deployment, it's recommended to build and push your image to Docker Hub:
+
+```bash
+# 1. Build the image
+docker build -t yourusername/geoguessr-mcp:latest .
+
+# 2. Login to Docker Hub
+docker login
+
+# 3. Push the image
+docker push yourusername/geoguessr-mcp:latest
+
+# 4. On your VPS, pull and run
+docker pull yourusername/geoguessr-mcp:latest
+```
+
+### Method 2: Deploy with Docker Compose on VPS
+
+#### Development/Testing Setup
+
+```bash
+# Clone repository on VPS
+git clone https://github.com/yourusername/geoguessr-mcp.git
+cd geoguessr-mcp
+
+# Create .env file
+cat > .env << EOF
+GEOGUESSR_NCFA_COOKIE=your_cookie_here
+DOCKER_USERNAME=yourusername
+IMAGE_TAG=latest
+EOF
+
+# Deploy
+docker compose up -d
+```
+
+#### Production Setup with SSL
 
 1. Create SSL certificates:
 ```bash
@@ -176,9 +214,55 @@ mkdir -p nginx/ssl
 # nginx/ssl/privkey.pem
 ```
 
-2. Deploy with production compose:
+2. Update docker-compose.prod.yml to use your Docker image:
+```bash
+# Edit docker-compose.prod.yml and uncomment the image line:
+# image: ${DOCKER_USERNAME:-yourusername}/geoguessr-mcp:${IMAGE_TAG:-latest}
+# Then comment out the build section
+```
+
+3. Deploy with production compose:
 ```bash
 docker compose -f docker-compose.prod.yml up -d
+```
+
+### Method 3: Direct Docker Run
+
+If you prefer not to use Docker Compose:
+
+```bash
+# Pull the image
+docker pull yourusername/geoguessr-mcp:latest
+
+# Create a volume for schema cache
+docker volume create geoguessr-schemas
+
+# Run the container
+docker run -d \
+  --name geoguessr-mcp \
+  --restart unless-stopped \
+  -p 8000:8000 \
+  -e GEOGUESSR_NCFA_COOKIE=your_cookie \
+  -e MONITORING_ENABLED=true \
+  -e MONITORING_INTERVAL_HOURS=24 \
+  -e LOG_LEVEL=INFO \
+  -v geoguessr-schemas:/app/data/schemas \
+  yourusername/geoguessr-mcp:latest
+```
+
+### Building Multi-Architecture Images
+
+For deployment on different CPU architectures (ARM64, AMD64):
+
+```bash
+# Enable buildx
+docker buildx create --use
+
+# Build and push multi-arch image
+docker buildx build \
+  --platform linux/amd64,linux/arm64 \
+  -t yourusername/geoguessr-mcp:latest \
+  --push .
 ```
 
 ### Environment Variables
@@ -189,8 +273,11 @@ docker compose -f docker-compose.prod.yml up -d
 | `MCP_PORT` | 8000 | Server port |
 | `MCP_TRANSPORT` | streamable-http | MCP transport protocol |
 | `MONITORING_ENABLED` | true | Enable API monitoring |
-| `MONITORING_INTERVAL_HOURS` | 24 | Monitoring check interval |
+| `MONITORING_INTERVAL_HOURS` | 24 | Monitoring check interval (runs every 24h) |
+| `SCHEMA_CACHE_DIR` | /app/data/schemas | Directory for schema persistence |
 | `LOG_LEVEL` | INFO | Logging verbosity |
+| `DOCKER_USERNAME` | yourusername | Your Docker Hub username (for compose files) |
+| `IMAGE_TAG` | latest | Docker image tag |
 
 ## 🧪 Development
 
