@@ -13,7 +13,7 @@ import logging
 from datetime import datetime
 from typing import Any
 
-from .SchemaField import SchemaField
+from .schema_field import SchemaField
 
 logger = logging.getLogger(__name__)
 

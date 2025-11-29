@@ -18,10 +18,10 @@ from typing import Optional
 
 import httpx
 
+from .endpoint_definition import EndpointDefinition
+from .endpoint_monitoring_result import MonitoringResult
+from ..schema.schema_registry import SchemaRegistry, schema_registry
 from ...config import settings
-from ..schema.SchemaRegistry import SchemaRegistry, schema_registry
-from .EndpointDefinition import EndpointDefinition
-from .EndpointMonitoringResult import MonitoringResult
 
 logger = logging.getLogger(__name__)
 

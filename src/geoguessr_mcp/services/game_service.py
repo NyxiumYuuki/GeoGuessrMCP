@@ -7,11 +7,8 @@ Handles game history, details, and competitive data with dynamic schema support.
 import logging
 from typing import Optional
 
-from ..api.client import DynamicResponse, GeoGuessrClient
-from ..api.endpoints import Endpoints
-from ..models.DailyChallenge import DailyChallenge
-from ..models.Game import Game
-from ..models.SeasonStats import SeasonStats
+from ..api import Endpoints, DynamicResponse, GeoGuessrClient
+from ..models import DailyChallenge, Game, SeasonStats
 
 logger = logging.getLogger(__name__)
 

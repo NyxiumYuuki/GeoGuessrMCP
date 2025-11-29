@@ -1,7 +1,8 @@
 """API client module for GeoGuessr communication."""
 
-from .client import DynamicResponse, GeoGuessrClient
+from .dynamic_response import DynamicResponse
 from .endpoints import EndpointBuilder, EndpointInfo, Endpoints
+from .geoguessr_client import GeoGuessrClient
 
 __all__ = [
     "GeoGuessrClient",

@@ -3,7 +3,7 @@
 from dataclasses import dataclass, field
 from typing import Optional
 
-from .RoundGuess import RoundGuess
+from .round_guess import RoundGuess
 
 
 @dataclass

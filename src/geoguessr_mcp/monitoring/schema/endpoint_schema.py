@@ -13,7 +13,7 @@ from dataclasses import dataclass, field
 from datetime import UTC, datetime
 from typing import Any, Optional
 
-from .SchemaField import SchemaField
+from .schema_field import SchemaField
 
 logger = logging.getLogger(__name__)
 

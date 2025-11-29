@@ -11,9 +11,9 @@ from typing import Optional
 
 from .game_service import GameService
 from .profile_service import ProfileService
-from ..api.client import GeoGuessrClient
-from ..models.Game import Game
-from ..monitoring.schema.SchemaRegistry import schema_registry
+from ..api import GeoGuessrClient
+from ..models import Game
+from ..monitoring import schema_registry
 
 logger = logging.getLogger(__name__)
 

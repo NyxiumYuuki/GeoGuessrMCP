@@ -8,11 +8,8 @@ dynamic schema adaptation.
 import logging
 from typing import Optional
 
-from ..api.client import DynamicResponse, GeoGuessrClient
-from ..api.endpoints import Endpoints
-from ..models.Achievement import Achievement
-from ..models.UserProfile import UserProfile
-from ..models.UserStats import UserStats
+from ..api import DynamicResponse, GeoGuessrClient, Endpoints
+from ..models import Achievement, UserProfile, UserStats
 
 logger = logging.getLogger(__name__)
 

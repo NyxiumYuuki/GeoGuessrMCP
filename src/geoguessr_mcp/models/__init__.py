@@ -1,12 +1,12 @@
 """Data models for GeoGuessr."""
 
-from .Achievement import Achievement
-from .DailyChallenge import DailyChallenge
-from .Game import Game
-from .RoundGuess import RoundGuess
-from .SeasonStats import SeasonStats
-from .UserProfile import UserProfile
-from .UserStats import UserStats
+from .achievement import Achievement
+from .daily_challenge import DailyChallenge
+from .game import Game
+from .round_guess import RoundGuess
+from .season_stats import SeasonStats
+from .user_profile import UserProfile
+from .user_stats import UserStats
 
 __all__ = [
     "UserProfile",
