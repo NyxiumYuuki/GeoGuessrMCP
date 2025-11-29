@@ -204,27 +204,32 @@ EOF
 docker compose up -d
 ```
 
-#### Production Setup with SSL
+#### Production Setup with SSL (VPS with nginx-proxy-manager)
 
-1. Create SSL certificates:
+If you have an existing nginx-proxy-manager setup (like with Firefly III), you can easily deploy this alongside it:
+
+1. **Build and push your image to Docker Hub:**
 ```bash
-mkdir -p nginx/ssl
-# Add your certificates:
-# nginx/ssl/fullchain.pem
-# nginx/ssl/privkey.pem
+docker build -t yourusername/geoguessr-mcp:latest .
+docker push yourusername/geoguessr-mcp:latest
 ```
 
-2. Update docker-compose.prod.yml to use your Docker image:
+2. **Deploy on VPS using the automated script:**
 ```bash
-# Edit docker-compose.prod.yml and uncomment the image line:
-# image: ${DOCKER_USERNAME:-yourusername}/geoguessr-mcp:${IMAGE_TAG:-latest}
-# Then comment out the build section
+# On your VPS
+cd /geoguessr-mcp
+cp .env.production .env
+# Edit .env with your DOCKER_USERNAME and GEOGUESSR_NCFA_COOKIE
+./deploy.sh
 ```
 
-3. Deploy with production compose:
-```bash
-docker compose -f docker-compose.prod.yml up -d
-```
+3. **Configure SSL in nginx-proxy-manager:**
+   - Access admin panel: `http://your-vps-ip:81`
+   - Add Proxy Host for your domain
+   - Forward to: `geoguessr-mcp-server:8000`
+   - Enable SSL with Let's Encrypt
+
+**📖 For detailed VPS deployment instructions, see [DEPLOYMENT.md](DEPLOYMENT.md)**
 
 ### Method 3: Direct Docker Run
 

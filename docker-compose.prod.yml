@@ -1,68 +1,51 @@
-# Production deployment with Nginx reverse proxy and SSL support
+# Production deployment for VPS with existing nginx-proxy-manager
+# This configuration connects to an existing nginx-proxy-manager for SSL/HTTPS
 
 services:
   geoguessr-mcp:
-    # Option 1: Build locally
-    build:
-      context: .
-      dockerfile: Dockerfile
+    # Option 1: Build locally (use for initial setup or development)
+    # build:
+    #   context: .
+    #   dockerfile: Dockerfile
 
-    # Option 2: Use pre-built image from Docker Hub (recommended for VPS)
-    # Uncomment the line below and comment out the build section above
-    # image: ${DOCKER_USERNAME:-yourusername}/geoguessr-mcp:${IMAGE_TAG:-latest}
+    # Option 2: Use pre-built image from Docker Hub (recommended for production)
+    # Update this with your Docker Hub username
+    image: ${DOCKER_USERNAME:-yourusername}/geoguessr-mcp:${IMAGE_TAG:-latest}
 
     container_name: geoguessr-mcp-server
     restart: unless-stopped
+
+    # Use expose instead of ports - only accessible through proxy
     expose:
       - "8000"
+
     env_file:
       - .env
+
     volumes:
       - geoguessr-schemas:/app/data/schemas
+
     healthcheck:
       test: [ "CMD", "curl", "-f", "http://localhost:8000/health" ]
       interval: 30s
       timeout: 10s
       retries: 3
       start_period: 15s
+
     logging:
       driver: "json-file"
       options:
         max-size: "10m"
         max-file: "5"
-    networks:
-      - internal
 
-  nginx:
-    image: nginx:alpine
-    container_name: geoguessr-mcp-nginx
-    restart: unless-stopped
-    ports:
-      - "80:80"
-      - "443:443"
-    volumes:
-      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
-      - ./nginx/ssl:/etc/nginx/ssl:ro
-      - ./nginx/logs:/var/log/nginx
-    depends_on:
-      geoguessr-mcp:
-        condition: service_healthy
+    # Connect to the same network as nginx-proxy-manager
     networks:
-      - internal
-      - external
-    logging:
-      driver: "json-file"
-      options:
-        max-size: "5m"
-        max-file: "3"
+      - firefly_network
 
 volumes:
   geoguessr-schemas:
     name: geoguessr-mcp-schemas-prod
 
 networks:
-  internal:
-    name: geoguessr-internal
-    internal: true
-  external:
-    name: geoguessr-external
+  firefly_network:
+    external: true
