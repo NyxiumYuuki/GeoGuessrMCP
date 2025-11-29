@@ -2,6 +2,14 @@
 
 A Model Context Protocol (MCP) server for analyzing GeoGuessr game statistics with **automatic API monitoring** and **dynamic schema adaptation**.
 
+## TODO
+
+- [ ] Fix Docker username in compose files and env vars
+- [ ] Add authentication to MCP server to allow access only to specific users
+- [ ] Fix Code Quality on tests not running
+- [ ] Fix Code Quality on black not formatting
+- [ ] Add auto monitoring for new endpoints and send notifications by email
+
 ## 🌟 Key Features
 
 ### Dynamic API Monitoring
@@ -30,8 +38,8 @@ A Model Context Protocol (MCP) server for analyzing GeoGuessr game statistics wi
 ### 1. Clone and Configure
 
 ```bash
-git clone https://github.com/yourusername/geoguessr-mcp.git
-cd geoguessr-mcp
+git clone https://github.com/NyxiumYuuki/GeoGuessrMCP.git
+cd GeoGuessrMCP
 cp .env.example .env
 ```
 
