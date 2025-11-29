@@ -50,14 +50,14 @@ check_environment() {
     print_success "Found $COMPOSE_FILE"
 
     if [ ! -f "$ENV_FILE" ]; then
-        print_warning "$ENV_FILE not found. Creating from example..."
-        if [ -f "$ENV_EXAMPLE" ]; then
-            cp "$ENV_EXAMPLE" "$ENV_FILE"
-            print_warning "Please edit $ENV_FILE with your actual credentials!"
-            print_info "Required: DOCKER_USERNAME and GEOGUESSR_NCFA_COOKIE"
+        print_warning "$ENV_FILE not found. Creating from .env.example..."
+        if [ -f ".env.example" ]; then
+            cp ".env.example" "$ENV_FILE"
+            print_warning "Please edit $ENV_FILE with your actual configuration!"
+            print_info "Configure GEOGUESSR_NCFA_COOKIE and MCP_API_KEYS if using authentication"
             exit 1
         else
-            print_error "No .env.production example found!"
+            print_error "No .env.example found!"
             exit 1
         fi
     fi
@@ -84,23 +84,25 @@ check_config() {
 
     source "$ENV_FILE"
 
-    if [ -z "$DOCKER_USERNAME" ] || [ "$DOCKER_USERNAME" == "yourusername" ]; then
-        print_error "DOCKER_USERNAME not configured in $ENV_FILE"
-        exit 1
-    fi
-    print_success "DOCKER_USERNAME is set: $DOCKER_USERNAME"
+    print_info "Using Docker image: nyxiumyuuki/geoguessr-mcp:latest"
 
-    if [ -z "$GEOGUESSR_NCFA_COOKIE" ] || [ "$GEOGUESSR_NCFA_COOKIE" == "your_actual_ncfa_cookie_value_here" ]; then
+    if [ -z "$GEOGUESSR_NCFA_COOKIE" ]; then
         print_warning "GEOGUESSR_NCFA_COOKIE not configured"
-        print_info "Most features require authentication. You can set this later."
+        print_info "Most GeoGuessr features require authentication. You can set this later."
     else
         print_success "GEOGUESSR_NCFA_COOKIE is configured"
     fi
 
-    if [ -z "$IMAGE_TAG" ]; then
-        IMAGE_TAG="latest"
+    if [ "$MCP_AUTH_ENABLED" == "true" ]; then
+        if [ -z "$MCP_API_KEYS" ]; then
+            print_error "MCP_AUTH_ENABLED is true but MCP_API_KEYS is not set!"
+            print_info "Either disable authentication or configure API keys"
+            exit 1
+        fi
+        print_success "MCP server authentication is ENABLED"
+    else
+        print_warning "MCP server authentication is DISABLED - server will be publicly accessible"
     fi
-    print_info "Using image tag: $IMAGE_TAG"
 }
 
 # Check if firefly_network exists
@@ -121,7 +123,7 @@ check_network() {
 pull_image() {
     print_header "Step 4: Pull Docker Image"
 
-    print_info "Pulling image: $DOCKER_USERNAME/geoguessr-mcp:$IMAGE_TAG"
+    print_info "Pulling image: nyxiumyuuki/geoguessr-mcp:latest"
     docker compose -f "$COMPOSE_FILE" pull
     print_success "Image pulled successfully"
 }
@@ -147,25 +149,16 @@ start_new() {
     docker compose -f "$COMPOSE_FILE" up -d
     print_success "Container started"
 
-    print_info "Waiting for container to be healthy..."
-    sleep 5
+    print_info "Waiting for container to start..."
+    sleep 3
 
-    # Check health
-    HEALTH=$(docker inspect geoguessr-mcp-server --format='{{.State.Health.Status}}' 2>/dev/null || echo "unknown")
-    if [ "$HEALTH" == "healthy" ]; then
-        print_success "Container is healthy!"
-    elif [ "$HEALTH" == "starting" ]; then
-        print_warning "Container is still starting... Check logs with:"
-        print_info "docker compose -f $COMPOSE_FILE logs -f"
+    # Check if running
+    if docker ps | grep -q geoguessr-mcp-server; then
+        print_success "Container is running"
     else
-        print_warning "Container health check not yet available. Checking if running..."
-        if docker ps | grep -q geoguessr-mcp-server; then
-            print_success "Container is running"
-        else
-            print_error "Container is not running!"
-            print_info "Check logs with: docker compose -f $COMPOSE_FILE logs"
-            exit 1
-        fi
+        print_error "Container is not running!"
+        print_info "Check logs with: docker compose -f $COMPOSE_FILE logs"
+        exit 1
     fi
 }
 
@@ -191,12 +184,23 @@ show_next_steps() {
     echo "   - Forward Port: 8000"
     echo "   - Enable SSL with Let's Encrypt"
     echo ""
-    echo "2. Test the health endpoint:"
-    echo "   curl https://your-domain.com/health"
+    echo "2. Test the MCP endpoint:"
+    echo "   curl https://your-domain.com/mcp"
+    echo "   (With auth): curl -H 'Authorization: Bearer YOUR_API_KEY' https://your-domain.com/mcp"
     echo ""
     echo "3. Connect Claude Desktop:"
     echo "   Add to claude_desktop_config.json:"
-    echo '   "geoguessr-mcp": { "url": "https://your-domain.com" }'
+    echo '   {'
+    echo '     "mcpServers": {'
+    echo '       "geoguessr": {'
+    echo '         "type": "streamable-http",'
+    echo '         "url": "https://your-domain.com/mcp",'
+    echo '         "headers": {'
+    echo '           "Authorization": "Bearer YOUR_API_KEY"'
+    echo '         }'
+    echo '       }'
+    echo '     }'
+    echo '   }'
     echo ""
 
     print_info "Useful Commands:"
@@ -204,14 +208,14 @@ show_next_steps() {
     echo "  View logs:        docker compose -f $COMPOSE_FILE logs -f"
     echo "  Restart:          docker compose -f $COMPOSE_FILE restart"
     echo "  Stop:             docker compose -f $COMPOSE_FILE down"
-    echo "  Update:           ./deploy.sh"
+    echo "  Update:           scripts/deploy.sh"
     echo ""
 
     print_info "Troubleshooting:"
     echo ""
     echo "  Check status:     docker ps | grep geoguessr-mcp"
-    echo "  Check health:     docker inspect geoguessr-mcp-server --format='{{.State.Health.Status}}'"
     echo "  Enter container:  docker exec -it geoguessr-mcp-server /bin/bash"
+    echo "  View all logs:    docker compose -f $COMPOSE_FILE logs --tail=100"
     echo ""
 
     print_info "For detailed documentation, see: DEPLOYMENT.md"

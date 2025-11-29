@@ -1,11 +1,13 @@
 services:
   geoguessr-mcp:
-    # Option 1: Build locally
-    build:
-      context: .
-      dockerfile: Dockerfile
-    # Option 2: Use pre-built image from Docker Hub (uncomment to use)
-    # image: ${DOCKER_USERNAME:-yourusername}/geoguessr-mcp:${IMAGE_TAG:-latest}
+    # Option 1: Build locally (for development)
+    # build:
+    #   context: .
+    #   dockerfile: Dockerfile
+
+    # Option 2: Use pre-built image from Docker Hub (recommended)
+    image: nyxiumyuuki/geoguessr-mcp:latest
+
     container_name: geoguessr-mcp-server
     restart: unless-stopped
     ports:
@@ -15,12 +17,6 @@ services:
     volumes:
       # Persist schema cache between restarts
       - geoguessr-schemas:${SCHEMA_CACHE_DIR:-/app/data/schemas}
-    healthcheck:
-      test: [ "CMD", "curl", "-f", "http://localhost:${MCP_PORT:-8000}/health" ]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 15s
     logging:
       driver: "json-file"
       options:
