@@ -12,6 +12,12 @@ A Model Context Protocol (MCP) server for analyzing GeoGuessr game statistics wi
 
 ## 🌟 Key Features
 
+### Multi-User Support
+- **Independent Sessions**: Each API key gets its own GeoGuessr session
+- **Multiple Accounts**: Different users can access their own GeoGuessr accounts
+- **Single Server**: No need to deploy separate instances per user
+- **Automatic Context**: User sessions are automatically managed per request
+
 ### Dynamic API Monitoring
 - **Automatic endpoint discovery**: Monitors GeoGuessr API endpoints daily
 - **Schema change detection**: Automatically detects when API response formats change
@@ -101,11 +107,13 @@ Add to your Claude Desktop configuration:
 
 ## 🔐 Authentication
 
-The server supports two types of authentication:
+The server supports two types of authentication with **multi-user support**:
 
 ### MCP Server Authentication (Controls Access to the MCP Server)
 
 Secures who can connect to your MCP server. When enabled, clients must provide a valid API key.
+
+**Multi-User Support:** Each API key can have its own GeoGuessr session, allowing multiple users to use the same MCP server instance with their own accounts!
 
 **Enable in `.env`:**
 ```bash
@@ -133,9 +141,19 @@ openssl rand -hex 32
 }
 ```
 
+**Multi-User Example:**
+```bash
+# Give each user their own API key
+MCP_API_KEYS=alice_key_abc123,bob_key_def456,charlie_key_ghi789
+
+# Alice connects with Authorization: Bearer alice_key_abc123
+# Bob connects with Authorization: Bearer bob_key_def456
+# Each can login to their own GeoGuessr account!
+```
+
 ### GeoGuessr API Authentication (Access GeoGuessr Data)
 
-The server also needs authentication to access GeoGuessr's API. Multiple methods supported:
+The server also needs authentication to access GeoGuessr's API. In multi-user mode, **each API key holder can login to their own GeoGuessr account:**
 
 ### Option 1: Login via Claude (Recommended)
 Simply ask Claude:
@@ -149,6 +167,75 @@ GEOGUESSR_NCFA_COOKIE=your_cookie_value_here
 
 ### Option 3: Manual Cookie
 Use the `set_ncfa_cookie` tool with a cookie extracted from your browser.
+
+## 👥 Multi-User Mode
+
+The server supports multiple users, each with their own GeoGuessr account, using a single MCP server instance.
+
+### How It Works
+
+1. **API Keys**: Each user gets a unique API key
+2. **Independent Sessions**: Each API key has its own GeoGuessr login session
+3. **Automatic Routing**: The server automatically routes requests to the correct user's session
+4. **No Interference**: Users don't affect each other's sessions
+
+### Setup Example
+
+**1. Configure Multiple API Keys:**
+```bash
+# .env file
+MCP_AUTH_ENABLED=true
+MCP_API_KEYS=alice_key,bob_key,charlie_key
+```
+
+**2. Restart Server:**
+```bash
+# Development
+docker compose restart
+
+# Production
+docker compose -f docker-compose.prod.yml restart
+```
+
+**3. Each User Connects:**
+```json
+// Alice's Claude Desktop config
+{
+  "mcpServers": {
+    "geoguessr": {
+      "url": "https://your-domain.com/mcp",
+      "headers": {"Authorization": "Bearer alice_key"}
+    }
+  }
+}
+
+// Bob's Claude Desktop config
+{
+  "mcpServers": {
+    "geoguessr": {
+      "url": "https://your-domain.com/mcp",
+      "headers": {"Authorization": "Bearer bob_key"}
+    }
+  }
+}
+```
+
+**4. Each User Logs In:**
+- Alice asks Claude: "Login to GeoGuessr with my credentials"
+- Bob asks Claude: "Login to GeoGuessr with my credentials"
+- Sessions are completely independent!
+
+### Adding New Users
+
+To add a new user to an existing deployment:
+
+1. Edit `.env` and add the new API key to `MCP_API_KEYS`
+2. Restart the server: `docker compose restart`
+3. Share the new API key with the user
+4. User configures their Claude Desktop with the API key
+5. User logs in to their GeoGuessr account via Claude
+
+**The server restarts in ~2-3 seconds** and all existing users remain logged in!
 
 ## 📊 Available Tools
 

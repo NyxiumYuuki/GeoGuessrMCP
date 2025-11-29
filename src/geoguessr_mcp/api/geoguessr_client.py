@@ -16,6 +16,7 @@ import httpx
 
 from .dynamic_response import DynamicResponse
 from .endpoints import EndpointInfo
+from ..auth import get_current_user_context
 from ..auth.session import SessionManager
 from ..config import settings
 from ..monitoring.schema.schema_registry import schema_registry
@@ -46,8 +47,21 @@ class GeoGuessrClient:
         self,
         session_token: Optional[str] = None,
     ) -> httpx.AsyncClient:
-        """Get an authenticated HTTP client."""
-        session = await self.session_manager.get_session(session_token)
+        """
+        Get an authenticated HTTP client.
+
+        In multi-user mode, if no session_token is provided, uses the current user's context
+        to get their session automatically.
+        """
+        # Try to get session from current user context (multi-user mode)
+        user_context = get_current_user_context()
+        if user_context and user_context.is_authenticated:
+            # Use the session from the user's context
+            session = user_context.session
+        else:
+            # Fall back to session manager (legacy mode or no user context)
+            session = await self.session_manager.get_session(session_token)
+
         if not session:
             raise ValueError(
                 "No valid session available. Please login first or set GEOGUESSR_NCFA_COOKIE."
