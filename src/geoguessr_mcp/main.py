@@ -11,6 +11,7 @@ import sys
 from mcp.server.fastmcp import FastMCP
 
 from .config import settings
+from .middleware import AuthenticationMiddleware
 from .monitoring import endpoint_monitor
 from .tools import register_all_tools
 
@@ -58,6 +59,12 @@ mcp = FastMCP(
 # Register all tools
 services = register_all_tools(mcp)
 
+# Add authentication middleware if needed
+if settings.MCP_AUTH_ENABLED:
+    logger.info("Registering authentication middleware")
+    # Add middleware to the underlying ASGI app
+    mcp.app.add_middleware(AuthenticationMiddleware)
+
 
 async def start_background_tasks():
     """Start background monitoring tasks."""
@@ -79,11 +86,17 @@ def main():
         f"with {settings.TRANSPORT} transport"
     )
 
+    if settings.MCP_AUTH_ENABLED:
+        api_key_count = len(settings.get_api_keys())
+        logger.info(f"MCP server authentication is ENABLED with {api_key_count} API key(s)")
+    else:
+        logger.warning("MCP server authentication is DISABLED - server is publicly accessible")
+
     if settings.DEFAULT_NCFA_COOKIE:
-        logger.info("Default authentication cookie configured from environment")
+        logger.info("Default GeoGuessr authentication cookie configured from environment")
     else:
         logger.warning(
-            "No default authentication cookie set. " "Users will need to login or provide a cookie."
+            "No default GeoGuessr authentication cookie set. " "Users will need to login or provide a cookie."
         )
 
     # Run the server

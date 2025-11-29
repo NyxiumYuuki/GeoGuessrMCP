@@ -4,8 +4,8 @@ A Model Context Protocol (MCP) server for analyzing GeoGuessr game statistics wi
 
 ## TODO
 
-- [ ] Fix Docker username in compose files and env vars
-- [ ] Add authentication to MCP server to allow access only to specific users
+- [x] ~~Fix Docker username in compose files and env vars~~
+- [x] ~~Add authentication to MCP server to allow access only to specific users~~
 - [ ] Fix Code Quality on tests not running
 - [ ] Fix Code Quality on black not formatting
 - [ ] Add auto monitoring for new endpoints and send notifications by email
@@ -51,13 +51,28 @@ docker compose up -d --build
 
 That's it! The server is now running on port 8000.
 
-### 3. Connect to Claude
+### 3. Configure MCP Server Authentication (Optional)
+
+To secure your MCP server with API key authentication, edit `.env`:
+
+```bash
+MCP_AUTH_ENABLED=true
+MCP_API_KEYS=your-secure-api-key-here
+```
+
+Generate a secure API key:
+```bash
+openssl rand -hex 32
+```
+
+### 4. Connect to Claude
 
 Add to your Claude Desktop configuration:
 
-**macOS:** `~/Library/Application Support/Claude/claude_desktop_config.json`  
+**macOS:** `~/Library/Application Support/Claude/claude_desktop_config.json`
 **Windows:** `%APPDATA%\Claude\claude_desktop_config.json`
 
+**Without Authentication:**
 ```json
 {
   "mcpServers": {
@@ -69,9 +84,58 @@ Add to your Claude Desktop configuration:
 }
 ```
 
+**With Authentication:**
+```json
+{
+  "mcpServers": {
+    "geoguessr": {
+      "type": "streamable-http",
+      "url": "http://YOUR_VPS_IP:8000/mcp",
+      "headers": {
+        "Authorization": "Bearer your-secure-api-key-here"
+      }
+    }
+  }
+}
+```
+
 ## 🔐 Authentication
 
-The server supports multiple authentication methods:
+The server supports two types of authentication:
+
+### MCP Server Authentication (Controls Access to the MCP Server)
+
+Secures who can connect to your MCP server. When enabled, clients must provide a valid API key.
+
+**Enable in `.env`:**
+```bash
+MCP_AUTH_ENABLED=true
+MCP_API_KEYS=key1,key2,key3  # Comma-separated for multiple users
+```
+
+**Generate secure keys:**
+```bash
+openssl rand -hex 32
+```
+
+**Configure Claude Desktop with authentication:**
+```json
+{
+  "mcpServers": {
+    "geoguessr": {
+      "type": "streamable-http",
+      "url": "https://your-domain.com/mcp",
+      "headers": {
+        "Authorization": "Bearer YOUR_API_KEY"
+      }
+    }
+  }
+}
+```
+
+### GeoGuessr API Authentication (Access GeoGuessr Data)
+
+The server also needs authentication to access GeoGuessr's API. Multiple methods supported:
 
 ### Option 1: Login via Claude (Recommended)
 Simply ask Claude:
@@ -174,68 +238,49 @@ Claude uses explore_endpoint tool:
 
 ## 🏭 Production Deployment
 
-### Method 1: Build and Push Docker Image
+The server is available as a pre-built Docker image: **`nyxiumyuuki/geoguessr-mcp:latest`**
 
-For VPS deployment, it's recommended to build and push your image to Docker Hub:
+### Method 1: Quick Deploy with Script
+
+For VPS deployment with existing nginx-proxy-manager:
 
 ```bash
-# 1. Build the image
-docker build -t yourusername/geoguessr-mcp:latest .
+# Clone repository on VPS
+git clone https://github.com/NyxiumYuuki/GeoGuessrMCP.git
+cd GeoGuessrMCP
 
-# 2. Login to Docker Hub
-docker login
+# Configure environment
+cp .env.example .env
+# Edit .env with your settings:
+# - GEOGUESSR_NCFA_COOKIE (for GeoGuessr API access)
+# - MCP_AUTH_ENABLED=true (optional, for MCP server security)
+# - MCP_API_KEYS (if authentication enabled)
 
-# 3. Push the image
-docker push yourusername/geoguessr-mcp:latest
-
-# 4. On your VPS, pull and run
-docker pull yourusername/geoguessr-mcp:latest
+# Run deployment script
+./scripts/deploy.sh
 ```
 
-### Method 2: Deploy with Docker Compose on VPS
+### Method 2: Manual Docker Compose Deploy
 
 #### Development/Testing Setup
 
 ```bash
-# Clone repository on VPS
-git clone https://github.com/yourusername/geoguessr-mcp.git
-cd geoguessr-mcp
-
-# Create .env file
-cat > .env << EOF
-GEOGUESSR_NCFA_COOKIE=your_cookie_here
-DOCKER_USERNAME=yourusername
-IMAGE_TAG=latest
-EOF
-
-# Deploy
+# Using docker-compose.yml (development)
 docker compose up -d
 ```
 
-#### Production Setup with SSL (VPS with nginx-proxy-manager)
+#### Production Setup with nginx-proxy-manager
 
-If you have an existing nginx-proxy-manager setup (like with Firefly III), you can easily deploy this alongside it:
-
-1. **Build and push your image to Docker Hub:**
 ```bash
-docker build -t yourusername/geoguessr-mcp:latest .
-docker push yourusername/geoguessr-mcp:latest
+# Using docker-compose.prod.yml (production)
+docker compose -f docker-compose.prod.yml up -d
 ```
 
-2. **Deploy on VPS using the automated script:**
-```bash
-# On your VPS
-cd /geoguessr-mcp
-cp .env.production .env
-# Edit .env with your DOCKER_USERNAME and GEOGUESSR_NCFA_COOKIE
-./deploy.sh
-```
-
-3. **Configure SSL in nginx-proxy-manager:**
-   - Access admin panel: `http://your-vps-ip:81`
-   - Add Proxy Host for your domain
-   - Forward to: `geoguessr-mcp-server:8000`
-   - Enable SSL with Let's Encrypt
+**Configure SSL in nginx-proxy-manager:**
+- Access admin panel: `http://your-vps-ip:81`
+- Add Proxy Host for your domain
+- Forward to: `geoguessr-mcp-server:8000`
+- Enable SSL with Let's Encrypt
 
 **📖 For detailed VPS deployment instructions, see [DEPLOYMENT.md](DEPLOYMENT.md)**
 
@@ -245,52 +290,52 @@ If you prefer not to use Docker Compose:
 
 ```bash
 # Pull the image
-docker pull yourusername/geoguessr-mcp:latest
+docker pull nyxiumyuuki/geoguessr-mcp:latest
 
 # Create a volume for schema cache
 docker volume create geoguessr-schemas
 
-# Run the container
+# Run the container (without authentication)
 docker run -d \
   --name geoguessr-mcp \
   --restart unless-stopped \
   -p 8000:8000 \
   -e GEOGUESSR_NCFA_COOKIE=your_cookie \
+  -e MCP_AUTH_ENABLED=false \
   -e MONITORING_ENABLED=true \
   -e MONITORING_INTERVAL_HOURS=24 \
   -e LOG_LEVEL=INFO \
   -v geoguessr-schemas:/app/data/schemas \
-  yourusername/geoguessr-mcp:latest
-```
+  nyxiumyuuki/geoguessr-mcp:latest
 
-### Building Multi-Architecture Images
-
-For deployment on different CPU architectures (ARM64, AMD64):
-
-```bash
-# Enable buildx
-docker buildx create --use
-
-# Build and push multi-arch image
-docker buildx build \
-  --platform linux/amd64,linux/arm64 \
-  -t yourusername/geoguessr-mcp:latest \
-  --push .
+# Run with MCP authentication enabled
+docker run -d \
+  --name geoguessr-mcp \
+  --restart unless-stopped \
+  -p 8000:8000 \
+  -e GEOGUESSR_NCFA_COOKIE=your_cookie \
+  -e MCP_AUTH_ENABLED=true \
+  -e MCP_API_KEYS=your-api-key-1,your-api-key-2 \
+  -e MONITORING_ENABLED=true \
+  -e MONITORING_INTERVAL_HOURS=24 \
+  -e LOG_LEVEL=INFO \
+  -v geoguessr-schemas:/app/data/schemas \
+  nyxiumyuuki/geoguessr-mcp:latest
 ```
 
 ### Environment Variables
 
 | Variable | Default | Description |
 |----------|---------|-------------|
-| `GEOGUESSR_NCFA_COOKIE` | - | Default authentication cookie |
+| `GEOGUESSR_NCFA_COOKIE` | - | GeoGuessr API authentication cookie |
+| `MCP_AUTH_ENABLED` | false | Enable MCP server authentication |
+| `MCP_API_KEYS` | - | Comma-separated API keys for MCP access |
 | `MCP_PORT` | 8000 | Server port |
 | `MCP_TRANSPORT` | streamable-http | MCP transport protocol |
 | `MONITORING_ENABLED` | true | Enable API monitoring |
 | `MONITORING_INTERVAL_HOURS` | 24 | Monitoring check interval (runs every 24h) |
 | `SCHEMA_CACHE_DIR` | /app/data/schemas | Directory for schema persistence |
 | `LOG_LEVEL` | INFO | Logging verbosity |
-| `DOCKER_USERNAME` | yourusername | Your Docker Hub username (for compose files) |
-| `IMAGE_TAG` | latest | Docker image tag |
 
 ## 🧪 Development
 

@@ -12,7 +12,8 @@ This document provides context for AI assistants (like Claude) working on the Ge
 geoguessr-mcp/
 ├── src/geoguessr_mcp/
 │   ├── api/              # GeoGuessr API client and response handling
-│   ├── auth/             # Authentication management
+│   ├── auth/             # GeoGuessr authentication management
+│   ├── middleware/       # MCP server authentication middleware
 │   ├── models/           # Data models (Profile, Stats, Games, etc.)
 │   ├── monitoring/       # Dynamic schema detection and API monitoring
 │   │   ├── endpoint/     # Endpoint monitoring logic
@@ -21,6 +22,8 @@ geoguessr-mcp/
 │   ├── tools/            # MCP tool definitions
 │   ├── config.py         # Configuration and settings
 │   └── main.py           # Application entry point
+├── scripts/              # Deployment scripts
+│   └── deploy.sh         # Automated production deployment
 ├── tests/                # Unit and integration tests
 ├── Dockerfile            # Container definition
 ├── docker-compose.yml    # Development deployment
@@ -54,9 +57,19 @@ Tools are organized by domain:
 
 Each tool returns a `DynamicResponse` which includes both the data and schema information.
 
-### 3. Authentication Flow
+### 3. Authentication Systems
 
-The server supports three authentication methods:
+The server has two authentication layers:
+
+#### MCP Server Authentication (Access Control)
+Controls who can connect to the MCP server:
+- **Bearer Token**: API key-based authentication via `Authorization` header
+- **Configuration**: `MCP_AUTH_ENABLED` and `MCP_API_KEYS` environment variables
+- **Middleware**: `src/geoguessr_mcp/middleware/auth.py` - Validates API keys
+- **Optional**: Can be disabled for local/trusted deployments
+
+#### GeoGuessr API Authentication (Data Access)
+The server supports three methods to access GeoGuessr's API:
 1. **Environment variable**: `GEOGUESSR_NCFA_COOKIE` in .env
 2. **Login tool**: Email/password authentication via MCP
 3. **Manual cookie**: Direct cookie setting via tool
@@ -64,6 +77,10 @@ The server supports three authentication methods:
 Session state is managed in `src/geoguessr_mcp/auth/session.py`.
 
 ## Docker Deployment
+
+### Official Docker Image
+
+The server is available as a pre-built image: **`nyxiumyuuki/geoguessr-mcp:latest`**
 
 ### Build Process
 
@@ -76,9 +93,19 @@ The Dockerfile uses a multi-stage approach:
 
 ### Deployment Options
 
-1. **Local Build**: `docker compose up -d --build`
-2. **Docker Hub**: Build, tag, push, then pull on VPS
+1. **Pre-built Image**: `docker compose up -d` (uses nyxiumyuuki/geoguessr-mcp:latest)
+2. **Local Build**: Uncomment build section in docker-compose.yml
 3. **Production**: Use `docker-compose.prod.yml` with nginx reverse proxy
+4. **Automated**: Use `./scripts/deploy.sh` for production deployment
+
+### MCP Server Authentication Configuration
+
+The server supports optional Bearer token authentication:
+- Set `MCP_AUTH_ENABLED=true` to enable
+- Set `MCP_API_KEYS=key1,key2,key3` for comma-separated keys
+- Generate secure keys with `openssl rand -hex 32`
+- Clients connect with `Authorization: Bearer YOUR_API_KEY` header
+- Middleware is in `src/geoguessr_mcp/middleware/auth.py`
 
 ### Monitoring Configuration
 

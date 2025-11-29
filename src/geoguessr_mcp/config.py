@@ -33,6 +33,14 @@ class Settings:
         default_factory=lambda: os.getenv("SCHEMA_CACHE_DIR", "/app/data/schemas")
     )
 
+    # Authentication Configuration
+    MCP_AUTH_ENABLED: bool = field(
+        default_factory=lambda: os.getenv("MCP_AUTH_ENABLED", "false").lower() == "true"
+    )
+    MCP_API_KEYS: Optional[str] = field(
+        default_factory=lambda: os.getenv("MCP_API_KEYS")
+    )
+
     # Logging Configuration
     LOG_LEVEL: str = field(default_factory=lambda: os.getenv("LOG_LEVEL", "INFO"))
 
@@ -48,6 +56,15 @@ class Settings:
             raise ValueError(f"Invalid port number: {self.PORT}")
         if self.MONITORING_INTERVAL_HOURS < 1:
             raise ValueError("Monitoring interval must be at least 1 hour")
+        if self.MCP_AUTH_ENABLED and not self.MCP_API_KEYS:
+            raise ValueError("MCP_AUTH_ENABLED is true but MCP_API_KEYS is not set")
+
+    def get_api_keys(self) -> set[str]:
+        """Parse and return the set of valid API keys."""
+        if not self.MCP_API_KEYS:
+            return set()
+        # Support comma-separated API keys
+        return {key.strip() for key in self.MCP_API_KEYS.split(",") if key.strip()}
 
 
 settings = Settings()
