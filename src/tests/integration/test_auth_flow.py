@@ -375,5 +375,5 @@ class TestRealAuthFlow:
         result = await session_manager.validate_cookie(cookie)
 
         assert result is not None
-        assert "id" in result
-        assert "nick" in result
+        assert "user" in result
+        assert "email" in result

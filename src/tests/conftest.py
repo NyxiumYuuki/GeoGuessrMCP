@@ -1,19 +1,44 @@
 """Shared test fixtures."""
-
+import os
 from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 
+from geoguessr_mcp.api import GeoGuessrClient
 from geoguessr_mcp.api.dynamic_response import DynamicResponse
-from geoguessr_mcp.auth import SessionManager
+from geoguessr_mcp.auth import SessionManager, UserSession
+from geoguessr_mcp.config import settings
 from geoguessr_mcp.models import RoundGuess, Game
 from geoguessr_mcp.services import AnalysisService, GameService, ProfileService
 
 
 @pytest.fixture(autouse=True)
-def mock_env(monkeypatch):
+def mock_env(request, monkeypatch):
     """Set up environment variables for testing."""
-    monkeypatch.setenv("GEOGUESSR_NCFA_COOKIE", "test_cookie_value")
+    # Skip this fixture if the test has the 'real_env' marker
+    if 'real_env' in request.keywords:
+        yield
+        return
+
+    # Clear the default cookie in settings to avoid interference
+    monkeypatch.setattr(settings, "DEFAULT_NCFA_COOKIE", None)
+
+    # Clear schema registry to avoid interference from registered schemas
+    from geoguessr_mcp.monitoring.schema.schema_registry import schema_registry
+    # Store original schemas
+    original_schemas = schema_registry.schemas.copy()
+    # Clear all schemas for testing
+    schema_registry.schemas.clear()
+
+    # Ensure required settings are set
+    if not hasattr(settings, "GEOGUESSR_API_URL") or not settings.GEOGUESSR_API_URL:
+        monkeypatch.setattr(settings, "GEOGUESSR_API_URL", "https://api.geoguessr.com")
+    if not hasattr(settings, "GEOGUESSR_DOMAIN_NAME") or not settings.GEOGUESSR_DOMAIN_NAME:
+        monkeypatch.setattr(settings, "GEOGUESSR_DOMAIN_NAME", ".geoguessr.com")
+
+    # Restore schemas after test
+    yield
+    schema_registry._schemas = original_schemas
 
 
 @pytest.fixture
@@ -22,6 +47,35 @@ def mock_client():
     client = MagicMock()
     client.get = AsyncMock()
     return client
+
+
+@pytest.fixture
+def real_client():
+    """Create a real client with environment authentication."""
+    real_cookie = os.getenv("GEOGUESSR_NCFA_COOKIE")
+    session_manager = SessionManager(default_cookie=real_cookie)
+    return GeoGuessrClient(session_manager)
+
+
+@pytest.fixture
+def client(mock_session_manager):
+    """Create a GeoGuessrClient with mocked session manager."""
+    return GeoGuessrClient(mock_session_manager)
+
+
+@pytest.fixture
+def mock_session_manager():
+    """Create a mock session manager."""
+    manager = MagicMock(spec=SessionManager)
+    manager.get_session = AsyncMock(
+        return_value=UserSession(
+            ncfa_cookie="test_cookie",
+            user_id="test-user",
+            username="TestUser",
+            email="test@example.com",
+        )
+    )
+    return manager
 
 
 @pytest.fixture
@@ -35,11 +89,19 @@ def mock_session():
 
 @pytest.fixture
 def session_manager():
-    return SessionManager()
+    """Create a SessionManager without default cookie."""
+    return SessionManager(default_cookie=None)
+
+
+@pytest.fixture
+def session_manager_with_default():
+    """Create a SessionManager with a default cookie."""
+    return SessionManager(default_cookie="test_cookie_value")
 
 
 @pytest.fixture
 def mock_httpx_client():
+    """Create a mock httpx client for testing."""
     with patch("httpx.AsyncClient") as mock_client_class:
         mock_client = AsyncMock()
         mock_client.__aenter__.return_value = mock_client
@@ -89,16 +151,21 @@ def profile_service(mock_client):
 
 @pytest.fixture
 def mock_dynamic_response():
-    """Create a mock DynamicResponse factory."""
+    """Create a DynamicResponse factory for testing."""
 
-    def create_response(data, success=True, status_code=200):
-        response = MagicMock(spec=DynamicResponse)
-        response.data = data
-        response.is_success = success
-        response.status_code = status_code
-        response.available_fields = list(data.keys()) if isinstance(data, dict) else []
-        response.summarize.return_value = {"data_summary": data}
-        return response
+    def create_response(data, success=True, status_code=200, endpoint="/mock/endpoint"):
+        """Create a real DynamicResponse instance for testing.
+        :param data:
+        :param status_code:
+        :param endpoint:
+        :type success: object
+        """
+        return DynamicResponse(
+            data=data,
+            endpoint=endpoint,
+            status_code=status_code,
+            response_time_ms=100.0,
+        )
 
     return create_response
 

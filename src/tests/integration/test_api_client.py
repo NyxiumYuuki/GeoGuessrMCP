@@ -11,7 +11,6 @@ import httpx
 import pytest
 
 from geoguessr_mcp.api import DynamicResponse, GeoGuessrClient, EndpointInfo, Endpoints
-from geoguessr_mcp.auth.session import SessionManager, UserSession
 from geoguessr_mcp.config import settings
 
 
@@ -52,7 +51,7 @@ class TestDynamicResponse:
         """Test available_fields with dict data."""
         response = DynamicResponse(
             data={"id": "123", "name": "Test", "score": 5000},
-            endpoint="/v3/test",
+            endpoint="/mock/endpoint",
             status_code=200,
             response_time_ms=100.0,
         )
@@ -62,7 +61,7 @@ class TestDynamicResponse:
         """Test available_fields with non-dict data."""
         response = DynamicResponse(
             data=["item1", "item2"],
-            endpoint="/v3/test",
+            endpoint="/mock/endpoint",
             status_code=200,
             response_time_ms=100.0,
         )
@@ -72,7 +71,7 @@ class TestDynamicResponse:
         """Test getting a simple field."""
         response = DynamicResponse(
             data={"id": "123", "name": "Test"},
-            endpoint="/v3/test",
+            endpoint="/mock/endpoint",
             status_code=200,
             response_time_ms=100.0,
         )
@@ -90,7 +89,7 @@ class TestDynamicResponse:
                     }
                 }
             },
-            endpoint="/v3/test",
+            endpoint="/mock/endpoint",
             status_code=200,
             response_time_ms=100.0,
         )
@@ -101,7 +100,7 @@ class TestDynamicResponse:
         """Test getting missing field returns default."""
         response = DynamicResponse(
             data={"id": "123"},
-            endpoint="/v3/test",
+            endpoint="/mock/endpoint",
             status_code=200,
             response_time_ms=100.0,
         )
@@ -137,13 +136,13 @@ class TestDynamicResponse:
                 ],
                 "total": 4,
             },
-            endpoint="/v3/test",
+            endpoint="/mock/endpoint",
             status_code=200,
             response_time_ms=100.0,
         )
         summary = response.summarize(max_depth=1)
 
-        assert summary["endpoint"] == "/v3/test"
+        assert summary["endpoint"] == "/mock/endpoint"
         assert summary["status"] == "success"
         assert "data_summary" in summary
 
@@ -152,7 +151,7 @@ class TestDynamicResponse:
         long_text = "x" * 200
         response = DynamicResponse(
             data={"description": long_text},
-            endpoint="/v3/test",
+            endpoint="/mock/endpoint",
             status_code=200,
             response_time_ms=100.0,
         )
@@ -164,25 +163,6 @@ class TestDynamicResponse:
 
 class TestGeoGuessrClient:
     """Tests for GeoGuessrClient."""
-
-    @pytest.fixture
-    def mock_session_manager(self):
-        """Create a mock session manager."""
-        manager = MagicMock(spec=SessionManager)
-        manager.get_session = AsyncMock(
-            return_value=UserSession(
-                ncfa_cookie="test_cookie",
-                user_id="test-user",
-                username="TestUser",
-                email="test@example.com",
-            )
-        )
-        return manager
-
-    @pytest.fixture
-    def client(self, mock_session_manager):
-        """Create a GeoGuessrClient with mocked session manager."""
-        return GeoGuessrClient(mock_session_manager)
 
     @pytest.mark.asyncio
     async def test_get_authenticated_client(self, client, mock_session_manager):
@@ -268,7 +248,7 @@ class TestGeoGuessrClient:
 
             mock_auth.return_value = mock_http_client
 
-            endpoint = EndpointInfo(path="/v3/test", method="POST")
+            endpoint = EndpointInfo(path="/mock/endpoint", method="POST")
             response = await client.post(endpoint, json_data={"data": "test"})
 
             assert response.is_success
@@ -309,6 +289,7 @@ class TestGeoGuessrClient:
 
 
 @pytest.mark.integration
+@pytest.mark.real_env
 class TestGeoGuessrClientIntegration:
     """
     Integration tests that would make real API calls.
@@ -317,12 +298,6 @@ class TestGeoGuessrClientIntegration:
     be run when explicitly requested (pytest -m integration) with a valid
     authentication cookie.
     """
-
-    @pytest.fixture
-    def real_client(self):
-        """Create a real client with environment authentication."""
-        session_manager = SessionManager()
-        return GeoGuessrClient(session_manager)
 
     @pytest.mark.asyncio
     async def test_real_profile_endpoint(self, real_client):
@@ -335,11 +310,12 @@ class TestGeoGuessrClientIntegration:
         response = await real_client.get(Endpoints.PROFILES.GET_PROFILE)
 
         assert response.is_success
-        assert "id" in response.available_fields or "nick" in response.available_fields
+        assert "user" in response.available_fields or "email" in response.available_fields
 
     @pytest.mark.asyncio
     async def test_real_stats_endpoint(self, real_client):
         """Test real API call to stats' endpoint."""
+        # This test requires GEOGUESSR_NCFA_COOKIE to be set
         import os
         if not os.environ.get("GEOGUESSR_NCFA_COOKIE"):
             pytest.skip("GEOGUESSR_NCFA_COOKIE not set")
