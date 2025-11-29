@@ -15,15 +15,8 @@ services:
     restart: unless-stopped
     expose:
       - "8000"
-    environment:
-      - GEOGUESSR_NCFA_COOKIE=${GEOGUESSR_NCFA_COOKIE:-}
-      - MCP_TRANSPORT=streamable-http
-      - MCP_HOST=0.0.0.0
-      - MCP_PORT=8000
-      - MONITORING_ENABLED=true
-      - MONITORING_INTERVAL_HOURS=24
-      - SCHEMA_CACHE_DIR=/app/data/schemas
-      - LOG_LEVEL=INFO
+    env_file:
+      - .env
     volumes:
       - geoguessr-schemas:/app/data/schemas
     healthcheck:

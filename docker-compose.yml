@@ -10,19 +10,8 @@ services:
     restart: unless-stopped
     ports:
       - "${MCP_PORT:-8000}:8000"
-    environment:
-      # GeoGuessr Authentication (optional - can use login tool instead)
-      - GEOGUESSR_NCFA_COOKIE=${GEOGUESSR_NCFA_COOKIE:-}
-      # MCP Server configuration
-      - MCP_TRANSPORT=${MCP_TRANSPORT:-streamable-http}
-      - MCP_HOST=${MCP_HOST:-0.0.0.0}
-      - MCP_PORT=${MCP_PORT:-8000}  # Use the same variable as in ports
-      # Monitoring configuration
-      - MONITORING_ENABLED=${MONITORING_ENABLED:-true}
-      - MONITORING_INTERVAL_HOURS=${MONITORING_INTERVAL_HOURS:-24}
-      - SCHEMA_CACHE_DIR=${SCHEMA_CACHE_DIR:-/app/data/schemas}
-      # Logging
-      - LOG_LEVEL=${LOG_LEVEL:-INFO}
+    env_file:
+      - .env
     volumes:
       # Persist schema cache between restarts
       - geoguessr-schemas:${SCHEMA_CACHE_DIR:-/app/data/schemas}
