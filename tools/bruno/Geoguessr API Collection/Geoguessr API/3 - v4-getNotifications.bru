@@ -1,0 +1,22 @@
+meta {
+  name: 3 - v4/getNotifications
+  type: http
+  seq: 3
+}
+
+get {
+  url: {{GEOGUESSR_API_URL}}/v4/notifications
+  body: none
+  auth: apikey
+}
+
+auth:apikey {
+  key: Cookie
+  value: _ncfa={{GEOGUESSR_NCFA_COOKIE}}
+  placement: header
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}
