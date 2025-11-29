@@ -75,7 +75,7 @@ def main():
             allow_origins=["*"],
             allow_credentials=True,
             allow_methods=["*"],
-            allow_headers=["*"]
+            allow_headers=["*"],
         )
         mcp_app.add_middleware(AuthenticationMiddleware)
 
