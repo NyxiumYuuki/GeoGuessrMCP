@@ -4,9 +4,15 @@ version: '3.8'
 
 services:
   geoguessr-mcp:
+    # Option 1: Build locally
     build:
       context: .
       dockerfile: Dockerfile
+
+    # Option 2: Use pre-built image from Docker Hub (recommended for VPS)
+    # Uncomment the line below and comment out the build section above
+    # image: ${DOCKER_USERNAME:-yourusername}/geoguessr-mcp:${IMAGE_TAG:-latest}
+
     container_name: geoguessr-mcp-server
     restart: unless-stopped
     expose:
