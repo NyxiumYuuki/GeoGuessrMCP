@@ -10,4 +10,4 @@ __author__ = "Yûki VACHOT"
 
 from .main import main, mcp
 
-__all__ = ["mcp", "main", "__version__"]
+__all__ = ["mcp", "main", "__version__", "__author__"]

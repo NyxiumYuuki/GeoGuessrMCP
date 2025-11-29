@@ -5,7 +5,6 @@ This server provides tools for analyzing GeoGuessr game statistics,
 with automatic API monitoring and dynamic schema adaptation.
 """
 
-import asyncio
 import logging
 import sys
 

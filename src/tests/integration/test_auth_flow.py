@@ -17,21 +17,6 @@ from geoguessr_mcp.auth.session import SessionManager, UserSession
 class TestAuthenticationFlow:
     """Integration tests for authentication flow with mocked HTTP."""
 
-    @pytest.fixture
-    def session_manager(self):
-        """Create a fresh session manager for each test."""
-        return SessionManager()
-
-    @pytest.fixture
-    def mock_httpx_client(self):
-        """Create a mock httpx client."""
-        with patch("httpx.AsyncClient") as mock_client_class:
-            mock_client = AsyncMock()
-            mock_client.__aenter__.return_value = mock_client
-            mock_client.__aexit__.return_value = None
-            mock_client_class.return_value = mock_client
-            yield mock_client
-
     @pytest.mark.asyncio
     async def test_complete_login_flow(self, session_manager, mock_httpx_client, mock_profile_data):
         """Test complete login flow from credentials to session."""
@@ -59,7 +44,7 @@ class TestAuthenticationFlow:
 
         # Verify session was created
         assert session_token is not None
-        assert len(session_token) > 20  # Token should be substantial
+        assert len(session_token) > 20  # Token should be significant
         assert session.ncfa_cookie == "test_cookie_value"
         assert session.username == "TestPlayer"
         assert session.user_id == "test-user-id"
@@ -233,19 +218,6 @@ class TestAuthenticationFlow:
 class TestLoginErrorHandling:
     """Tests for login error scenarios."""
 
-    @pytest.fixture
-    def session_manager(self):
-        return SessionManager()
-
-    @pytest.fixture
-    def mock_httpx_client(self):
-        with patch("httpx.AsyncClient") as mock_client_class:
-            mock_client = AsyncMock()
-            mock_client.__aenter__.return_value = mock_client
-            mock_client.__aexit__.return_value = None
-            mock_client_class.return_value = mock_client
-            yield mock_client
-
     @pytest.mark.asyncio
     async def test_login_invalid_credentials(self, session_manager, mock_httpx_client):
         """Test login with invalid credentials."""
@@ -326,10 +298,6 @@ class TestLoginErrorHandling:
 class TestCookieValidation:
     """Tests for cookie validation functionality."""
 
-    @pytest.fixture
-    def session_manager(self):
-        return SessionManager()
-
     @pytest.mark.asyncio
     async def test_validate_valid_cookie(self, session_manager, mock_profile_data):
         """Test validating a valid cookie."""
@@ -394,10 +362,6 @@ class TestRealAuthFlow:
     These tests are skipped unless GEOGUESSR_NCFA_COOKIE is set and
     running with -m integration flag.
     """
-
-    @pytest.fixture
-    def session_manager(self):
-        return SessionManager()
 
     @pytest.mark.asyncio
     async def test_real_cookie_validation(self, session_manager):

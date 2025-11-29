@@ -1,10 +1,11 @@
 """Shared test fixtures."""
 
-from unittest.mock import AsyncMock, MagicMock
+from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 
 from geoguessr_mcp.api.dynamic_response import DynamicResponse
+from geoguessr_mcp.auth import SessionManager
 from geoguessr_mcp.models import RoundGuess, Game
 from geoguessr_mcp.services import AnalysisService, GameService, ProfileService
 
@@ -30,6 +31,21 @@ def mock_session():
     mock_client.__aenter__.return_value = mock_client
     mock_client.__aexit__.return_value = None
     return mock_client
+
+
+@pytest.fixture
+def session_manager():
+    return SessionManager()
+
+
+@pytest.fixture
+def mock_httpx_client():
+    with patch("httpx.AsyncClient") as mock_client_class:
+        mock_client = AsyncMock()
+        mock_client.__aenter__.return_value = mock_client
+        mock_client.__aexit__.return_value = None
+        mock_client_class.return_value = mock_client
+        yield mock_client
 
 
 @pytest.fixture
