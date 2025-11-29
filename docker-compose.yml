@@ -1,12 +1,12 @@
 services:
   geoguessr-mcp:
     # Option 1: Build locally (for development)
-    # build:
-    #   context: .
-    #   dockerfile: Dockerfile
+    build:
+      context: .
+      dockerfile: Dockerfile
 
     # Option 2: Use pre-built image from Docker Hub (recommended)
-    image: nyxiumyuuki/geoguessr-mcp:latest
+    # image: nyxiumyuuki/geoguessr-mcp:latest
 
     container_name: geoguessr-mcp-server
     restart: unless-stopped

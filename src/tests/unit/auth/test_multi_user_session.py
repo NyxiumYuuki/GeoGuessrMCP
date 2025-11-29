@@ -61,7 +61,7 @@ class TestMultiUserSessionManager:
         assert session is None
 
     @pytest.mark.asyncio
-    async def test_login_user_creates_manager_if_not_exists(self, manager, mock_http_client):
+    async def test_login_user_creates_manager_if_not_exists(self, manager):
         """Test that login_user creates a manager if it doesn't exist."""
         # This test requires mocking the HTTP client for GeoGuessr API
         # We'll mark it as a placeholder for now
