@@ -1,0 +1,22 @@
+meta {
+  name: 35 - game-server/getTournaments
+  type: http
+  seq: 30
+}
+
+get {
+  url: {{GAME_SERVER_URL}}/tournaments
+  body: none
+  auth: apikey
+}
+
+auth:apikey {
+  key: Cookie
+  value: _ncfa={{GEOGUESSR_NCFA_COOKIE}}
+  placement: header
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}

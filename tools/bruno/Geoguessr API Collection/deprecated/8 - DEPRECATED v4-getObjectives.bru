@@ -1,0 +1,22 @@
+meta {
+  name: 8 - DEPRECATED v4/getObjectives
+  type: http
+  seq: 2
+}
+
+get {
+  url: {{GEOGUESSR_API_URL}}/v4/objectives
+  body: none
+  auth: apikey
+}
+
+auth:apikey {
+  key: Cookie
+  value: _ncfa={{GEOGUESSR_NCFA_COOKIE}}
+  placement: header
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}

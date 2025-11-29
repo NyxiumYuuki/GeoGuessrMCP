@@ -1,0 +1,26 @@
+meta {
+  name: 9 - v3/getPersonalizedMap
+  type: http
+  seq: 9
+}
+
+get {
+  url: {{GEOGUESSR_API_URL}}/v3/social/maps/browse/personalized
+  body: none
+  auth: apikey
+}
+
+auth:apikey {
+  key: Cookie
+  value: _ncfa={{GEOGUESSR_NCFA_COOKIE}}
+  placement: header
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}
+
+docs {
+  personalised map for the currently logged-in user
+}

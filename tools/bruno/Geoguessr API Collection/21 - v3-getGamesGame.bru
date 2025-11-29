@@ -1,11 +1,11 @@
 meta {
-  name: getProfiles
+  name: 21 - v3/getGamesGame
   type: http
-  seq: 1
+  seq: 21
 }
 
 get {
-  url: {{GEOGUESSR_API_URL}}/v3/profiles
+  url: {{GEOGUESSR_API_URL}}/v3/games/<game_token_here>
   body: none
   auth: apikey
 }

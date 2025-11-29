@@ -1,0 +1,22 @@
+meta {
+  name: 7 - DEPRECATED v3/getProfilesAchivements
+  type: http
+  seq: 1
+}
+
+get {
+  url: {{GEOGUESSR_API_URL}}/v3/profiles/achievements
+  body: none
+  auth: apikey
+}
+
+auth:apikey {
+  key: Cookie
+  value: _ncfa={{GEOGUESSR_NCFA_COOKIE}}
+  placement: header
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}

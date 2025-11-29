@@ -1,0 +1,22 @@
+meta {
+  name: 17 - v3/getExplorer
+  type: http
+  seq: 17
+}
+
+get {
+  url: {{GEOGUESSR_API_URL}}/v3/explorer
+  body: none
+  auth: apikey
+}
+
+auth:apikey {
+  key: Cookie
+  value: _ncfa={{GEOGUESSR_NCFA_COOKIE}}
+  placement: header
+}
+
+settings {
+  encodeUrl: true
+  timeout: 0
+}
