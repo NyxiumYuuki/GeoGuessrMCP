@@ -28,11 +28,11 @@ jobs:
 
     - name: Check formatting with Black
       run: |
-        black --check src/ tests/
+        black --check src/
 
     - name: Lint with Ruff
       run: |
-        ruff check src/ tests/
+        ruff check src/
 
     - name: Type check with MyPy
       run: |
@@ -64,7 +64,7 @@ jobs:
 
     - name: Run unit tests
       run: |
-        pytest tests/unit/ -v --cov=src/geoguessr_mcp --cov-report=xml --cov-report=term
+        pytest src/tests/ -v --cov=src/geoguessr_mcp --cov-report=xml --cov-report=term
 
     - name: Upload coverage reports
       uses: codecov/codecov-action@v4
