@@ -1,7 +1,8 @@
 """
 Authentication middleware for MCP server.
 
-Provides Bearer token authentication for HTTP-based MCP transports.
+Provides Bearer token authentication for HTTP-based MCP transports
+and attaches user context for multi-user support.
 """
 
 import logging
@@ -11,6 +12,7 @@ from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.requests import Request
 from starlette.responses import JSONResponse, Response
 
+from ..auth import multi_user_session_manager, set_current_user_context
 from ..config import settings
 
 logger = logging.getLogger(__name__)
@@ -40,8 +42,12 @@ class AuthenticationMiddleware(BaseHTTPMiddleware):
     async def dispatch(self, request: Request, call_next) -> Response:
         """Process the request and validate authentication if enabled."""
 
-        # Skip authentication if disabled
+        # If authentication is disabled, create a default user context
         if not self.enabled:
+            # Use a default API key for all unauthenticated requests
+            user_context = await multi_user_session_manager.get_user_context("default")
+            request.state.user_context = user_context
+            set_current_user_context(user_context)
             return await call_next(request)
 
         # Skip authentication for health check endpoint
@@ -90,7 +96,16 @@ class AuthenticationMiddleware(BaseHTTPMiddleware):
             )
 
         # Authentication successful
-        logger.debug(f"Authenticated request from {request.client.host}")
+        logger.debug(f"Authenticated request from {request.client.host} with API key {token[:8]}...")
+
+        # Get or create user context for this API key
+        user_context = await multi_user_session_manager.get_user_context(token)
+
+        # Attach user context to request state and context variable
+        request.state.user_context = user_context
+        set_current_user_context(user_context)
+
+        logger.debug(f"Request context: {user_context}")
 
         # Proceed with the request
         response = await call_next(request)
