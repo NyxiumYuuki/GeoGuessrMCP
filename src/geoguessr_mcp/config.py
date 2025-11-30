@@ -30,7 +30,7 @@ class Settings:
         default_factory=lambda: int(os.getenv("MONITORING_INTERVAL_HOURS", "24"))
     )
     SCHEMA_CACHE_DIR: str = field(
-        default_factory=lambda: os.getenv("SCHEMA_CACHE_DIR", "/app/data/schemas")
+        default_factory=lambda: os.getenv("SCHEMA_CACHE_DIR", "./data/schemas")
     )
 
     # Authentication Configuration

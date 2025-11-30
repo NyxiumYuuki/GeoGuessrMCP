@@ -9,7 +9,9 @@ import logging
 import sys
 
 from mcp.server.fastmcp import FastMCP
+from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.middleware.cors import CORSMiddleware
+from starlette.requests import Request
 
 from .config import settings
 from .middleware import AuthenticationMiddleware
@@ -21,16 +23,58 @@ logging.basicConfig(
     format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
     handlers=[logging.StreamHandler(sys.stdout)],
 )
-
 logger = logging.getLogger(__name__)
+
+
+class RequestLoggingMiddleware(BaseHTTPMiddleware):
+    """Log request details for debugging."""
+
+    async def dispatch(self, request: Request, call_next):
+        """Log request and response details."""
+        logger.debug(f"Request: {request.method} {request.url.path}")
+        logger.debug(f"Headers: {dict(request.headers)}")
+
+        response = await call_next(request)
+
+        if response.status_code >= 400:
+            logger.warning(
+                f"Error response: {request.method} {request.url.path} -> {response.status_code}"
+            )
+
+        return response
 
 
 def main():
     """Main entry point for the server."""
 
-    # Create the MCP server instance
+    # Prepare middleware list
+    from starlette.middleware import Middleware
+
+    middleware_list = []
+
+    # Add request logging middleware for debugging (first in chain)
+    if settings.LOG_LEVEL == "DEBUG":
+        middleware_list.append(Middleware(RequestLoggingMiddleware))
+
+    # Always add CORS middleware for browser compatibility
+    middleware_list.append(
+        Middleware(
+            CORSMiddleware,
+            allow_origins=["*"],
+            allow_credentials=True,
+            allow_methods=["*"],
+            allow_headers=["*"],
+        )
+    )
+
+    # Add authentication middleware if enabled
+    if settings.MCP_AUTH_ENABLED:
+        logger.info("Setting up authentication middleware")
+        middleware_list.append(Middleware(AuthenticationMiddleware))
+
+    # Create the MCP server instance with middleware
     mcp = FastMCP(
-        "GeoGuessr Analyzer",
+        "GeoGuessr MCP",
         instructions="""
         MCP server for analyzing GeoGuessr game statistics and optimizing gameplay strategy.
 
@@ -62,23 +106,6 @@ def main():
     # Register all tools
     register_all_tools(mcp)
 
-    # Setup authentication middleware if enabled
-    if settings.MCP_AUTH_ENABLED:
-        logger.info("Setting up authentication middleware")
-
-        # Récupérez l'application ASGI via streamable_http_app
-        mcp_app = mcp.streamable_http_app()
-
-        # Ajoutez les middlewares
-        mcp_app.add_middleware(
-            CORSMiddleware,
-            allow_origins=["*"],
-            allow_credentials=True,
-            allow_methods=["*"],
-            allow_headers=["*"],
-        )
-        mcp_app.add_middleware(AuthenticationMiddleware)
-
     logger.info(
         f"Starting GeoGuessr MCP Server on {settings.HOST}:{settings.PORT} "
         f"with {settings.TRANSPORT} transport"
@@ -98,8 +125,8 @@ def main():
             "Users will need to login or provide a cookie."
         )
 
-    # Run the server
-    mcp.run(transport=settings.TRANSPORT)
+    # Run the server with middleware support
+    mcp.run(transport=settings.TRANSPORT, middleware=middleware_list)
 
 
 if __name__ == "__main__":
