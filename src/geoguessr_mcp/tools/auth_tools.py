@@ -99,9 +99,7 @@ def register_auth_tools(mcp: FastMCP, session_manager=None):
         if not user_context:
             return {"success": False, "error": "No user context available"}
 
-        success = await multi_user_session_manager.logout_user(
-            user_context.api_key, session_token
-        )
+        success = await multi_user_session_manager.logout_user(user_context.api_key, session_token)
 
         return {
             "success": success,

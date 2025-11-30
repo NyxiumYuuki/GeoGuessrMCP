@@ -17,7 +17,7 @@ class TestProfileService:
 
     @pytest.mark.asyncio
     async def test_get_profile_success(
-            self, profile_service, mock_client, mock_profile_data, mock_dynamic_response
+        self, profile_service, mock_client, mock_profile_data, mock_dynamic_response
     ):
         """Test successful profile retrieval."""
         mock_client.get.return_value = mock_dynamic_response(mock_profile_data)
@@ -34,7 +34,7 @@ class TestProfileService:
 
     @pytest.mark.asyncio
     async def test_get_profile_with_session_token(
-            self, profile_service, mock_client, mock_profile_data, mock_dynamic_response
+        self, profile_service, mock_client, mock_profile_data, mock_dynamic_response
     ):
         """Test profile retrieval with explicit session token."""
         mock_client.get.return_value = mock_dynamic_response(mock_profile_data)
@@ -57,7 +57,7 @@ class TestProfileService:
 
     @pytest.mark.asyncio
     async def test_get_stats_success(
-            self, profile_service, mock_client, mock_stats_data, mock_dynamic_response
+        self, profile_service, mock_client, mock_stats_data, mock_dynamic_response
     ):
         """Test successful stats retrieval."""
         mock_client.get.return_value = mock_dynamic_response(mock_stats_data)
@@ -97,7 +97,7 @@ class TestProfileService:
 
     @pytest.mark.asyncio
     async def test_get_achievements_list_format(
-            self, profile_service, mock_client, mock_dynamic_response
+        self, profile_service, mock_client, mock_dynamic_response
     ):
         """Test achievements retrieval with list format response."""
         achievements_data = [
@@ -128,7 +128,7 @@ class TestProfileService:
 
     @pytest.mark.asyncio
     async def test_get_achievements_dict_format(
-            self, profile_service, mock_client, mock_dynamic_response
+        self, profile_service, mock_client, mock_dynamic_response
     ):
         """Test achievements retrieval with dict format response."""
         achievements_data = {
@@ -175,12 +175,12 @@ class TestProfileService:
 
     @pytest.mark.asyncio
     async def test_get_comprehensive_profile_success(
-            self,
-            profile_service,
-            mock_client,
-            mock_profile_data,
-            mock_stats_data,
-            mock_dynamic_response,
+        self,
+        profile_service,
+        mock_client,
+        mock_profile_data,
+        mock_stats_data,
+        mock_dynamic_response,
     ):
         """Test comprehensive profile aggregation."""
         # Setup mock responses for each call
@@ -208,7 +208,7 @@ class TestProfileService:
 
     @pytest.mark.asyncio
     async def test_get_comprehensive_profile_partial_failure(
-            self, profile_service, mock_client, mock_profile_data, mock_dynamic_response
+        self, profile_service, mock_client, mock_profile_data, mock_dynamic_response
     ):
         """Test comprehensive profile with some endpoints failing."""
         mock_client.get.side_effect = [

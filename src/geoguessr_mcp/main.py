@@ -9,10 +9,10 @@ import logging
 import sys
 
 from mcp.server.fastmcp import FastMCP
+from starlette.middleware.cors import CORSMiddleware
 
 from .config import settings
 from .middleware import AuthenticationMiddleware
-from .monitoring import endpoint_monitor
 from .tools import register_all_tools
 
 # Configure logging
@@ -25,62 +25,60 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 
-# Create the MCP server instance
-mcp = FastMCP(
-    "GeoGuessr Analyzer",
-    instructions="""
-    MCP server for analyzing GeoGuessr game statistics and optimizing gameplay strategy.
-    
-    This server provides:
-    - Profile and statistics retrieval
-    - Game history and analysis
-    - Performance tracking and recommendations
-    - API monitoring with automatic schema adaptation
-    
-    The server automatically tracks API endpoint changes and adapts to response format
-    modifications. Use the monitoring tools to check API status and discover available data.
-    
-    Authentication:
-    - Use 'login(email, password)' to authenticate with your GeoGuessr account
-    - Or use 'set_ncfa_cookie(cookie)' with a cookie from your browser
-    - Or set GEOGUESSR_NCFA_COOKIE environment variable for automatic auth
-    
-    Key tools:
-    - get_performance_summary() - Comprehensive overview of your account
-    - analyze_recent_games(count) - Analyze your recent gameplay
-    - get_strategy_recommendations() - Get personalized improvement tips
-    - check_api_status() - Monitor API endpoint availability
-    - explore_endpoint(path) - Discover new API endpoints
-    """,
-    host=settings.HOST,
-    port=settings.PORT,
-)
-
-# Register all tools
-services = register_all_tools(mcp)
-
-# Add authentication middleware if needed
-if settings.MCP_AUTH_ENABLED:
-    logger.info("Registering authentication middleware")
-    # Add middleware to the underlying ASGI app
-    mcp.app.add_middleware(AuthenticationMiddleware)
-
-
-async def start_background_tasks():
-    """Start background monitoring tasks."""
-    if settings.MONITORING_ENABLED:
-        logger.info("Starting API monitoring background task...")
-        await endpoint_monitor.start_periodic_monitoring()
-
-
-async def stop_background_tasks():
-    """Stop background monitoring tasks."""
-    if endpoint_monitor._running:
-        await endpoint_monitor.stop_monitoring()
-
-
 def main():
     """Main entry point for the server."""
+
+    # Create the MCP server instance
+    mcp = FastMCP(
+        "GeoGuessr Analyzer",
+        instructions="""
+        MCP server for analyzing GeoGuessr game statistics and optimizing gameplay strategy.
+
+        This server provides:
+        - Profile and statistics retrieval
+        - Game history and analysis
+        - Performance tracking and recommendations
+        - API monitoring with automatic schema adaptation
+
+        The server automatically tracks API endpoint changes and adapts to response format
+        modifications. Use the monitoring tools to check API status and discover available data.
+
+        Authentication:
+        - Use 'login(email, password)' to authenticate with your GeoGuessr account
+        - Or use 'set_ncfa_cookie(cookie)' with a cookie from your browser
+        - Or set GEOGUESSR_NCFA_COOKIE environment variable for automatic auth
+
+        Key tools:
+        - get_performance_summary() - Comprehensive overview of your account
+        - analyze_recent_games(count) - Analyze your recent gameplay
+        - get_strategy_recommendations() - Get personalized improvement tips
+        - check_api_status() - Monitor API endpoint availability
+        - explore_endpoint(path) - Discover new API endpoints
+        """,
+        host=settings.HOST,
+        port=settings.PORT,
+    )
+
+    # Register all tools
+    register_all_tools(mcp)
+
+    # Setup authentication middleware if enabled
+    if settings.MCP_AUTH_ENABLED:
+        logger.info("Setting up authentication middleware")
+
+        # Récupérez l'application ASGI via streamable_http_app
+        mcp_app = mcp.streamable_http_app()
+
+        # Ajoutez les middlewares
+        mcp_app.add_middleware(
+            CORSMiddleware,
+            allow_origins=["*"],
+            allow_credentials=True,
+            allow_methods=["*"],
+            allow_headers=["*"],
+        )
+        mcp_app.add_middleware(AuthenticationMiddleware)
+
     logger.info(
         f"Starting GeoGuessr MCP Server on {settings.HOST}:{settings.PORT} "
         f"with {settings.TRANSPORT} transport"
@@ -96,7 +94,8 @@ def main():
         logger.info("Default GeoGuessr authentication cookie configured from environment")
     else:
         logger.warning(
-            "No default GeoGuessr authentication cookie set. " "Users will need to login or provide a cookie."
+            "No default GeoGuessr authentication cookie set. "
+            "Users will need to login or provide a cookie."
         )
 
     # Run the server
