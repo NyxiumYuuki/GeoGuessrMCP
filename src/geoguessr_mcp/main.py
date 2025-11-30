@@ -8,7 +8,6 @@ with automatic API monitoring and dynamic schema adaptation.
 import logging
 import sys
 
-import uvicorn
 from mcp.server.fastmcp import FastMCP
 from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.middleware.cors import CORSMiddleware
@@ -48,7 +47,32 @@ class RequestLoggingMiddleware(BaseHTTPMiddleware):
 def main():
     """Main entry point for the server."""
 
-    # Create the MCP server instance
+    # Prepare middleware list
+    from starlette.middleware import Middleware
+
+    middleware_list = []
+
+    # Add request logging middleware for debugging (first in chain)
+    if settings.LOG_LEVEL == "DEBUG":
+        middleware_list.append(Middleware(RequestLoggingMiddleware))
+
+    # Always add CORS middleware for browser compatibility
+    middleware_list.append(
+        Middleware(
+            CORSMiddleware,
+            allow_origins=["*"],
+            allow_credentials=True,
+            allow_methods=["*"],
+            allow_headers=["*"],
+        )
+    )
+
+    # Add authentication middleware if enabled
+    if settings.MCP_AUTH_ENABLED:
+        logger.info("Setting up authentication middleware")
+        middleware_list.append(Middleware(AuthenticationMiddleware))
+
+    # Create the MCP server instance with middleware
     mcp = FastMCP(
         "GeoGuessr MCP",
         instructions="""
@@ -82,33 +106,6 @@ def main():
     # Register all tools
     register_all_tools(mcp)
 
-    # Get the ASGI application
-    if settings.TRANSPORT == "streamable-http":
-        mcp_app = mcp.streamable_http_app()
-    elif settings.TRANSPORT == "sse":
-        mcp_app = mcp.sse_app()
-    else:
-        logger.error("Unsupported transport: %s", settings.TRANSPORT)
-        return
-
-    # Add request logging middleware for debugging (first, so it logs everything)
-    if settings.LOG_LEVEL == "DEBUG":
-        mcp_app.add_middleware(RequestLoggingMiddleware)
-
-    # Always add CORS middleware for browser compatibility
-    mcp_app.add_middleware(
-        CORSMiddleware,
-        allow_origins=["*"],
-        allow_credentials=True,
-        allow_methods=["*"],
-        allow_headers=["*"],
-    )
-
-    # Setup authentication middleware if enabled
-    if settings.MCP_AUTH_ENABLED:
-        logger.info("Setting up authentication middleware")
-        mcp_app.add_middleware(AuthenticationMiddleware)
-
     logger.info(
         f"Starting GeoGuessr MCP Server on {settings.HOST}:{settings.PORT} "
         f"with {settings.TRANSPORT} transport"
@@ -128,14 +125,8 @@ def main():
             "Users will need to login or provide a cookie."
         )
 
-    # Run the server with the modified app (with middleware)
-    uvicorn.run(
-        mcp_app,
-        host=settings.HOST,
-        port=settings.PORT,
-        log_level=settings.LOG_LEVEL.lower(),
-        access_log=True,
-    )
+    # Run the server with middleware support
+    mcp.run(transport=settings.TRANSPORT, middleware=middleware_list)
 
 
 if __name__ == "__main__":
