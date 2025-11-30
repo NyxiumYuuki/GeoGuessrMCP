@@ -71,6 +71,16 @@ class SchemaRegistry:
                     for endpoint, schema_data in data.items():
                         self.schemas[endpoint] = EndpointSchema.from_dict(schema_data)
                 logger.info(f"Loaded {len(self.schemas)} cached schemas")
+            except json.JSONDecodeError as e:
+                logger.warning(
+                    f"Failed to load cached schemas due to corrupted JSON: {e}. "
+                    f"Removing corrupted cache file."
+                )
+                try:
+                    schema_file.unlink()
+                    logger.info(f"Removed corrupted schema cache file: {schema_file}")
+                except Exception as rm_error:
+                    logger.error(f"Failed to remove corrupted cache file: {rm_error}")
             except Exception as e:
                 logger.warning(f"Failed to load cached schemas: {e}")
 
@@ -83,6 +93,16 @@ class SchemaRegistry:
                         self.schema_history[endpoint] = [
                             EndpointSchema.from_dict(h) for h in history
                         ]
+            except json.JSONDecodeError as e:
+                logger.warning(
+                    f"Failed to load schema history due to corrupted JSON: {e}. "
+                    f"Removing corrupted history file."
+                )
+                try:
+                    history_file.unlink()
+                    logger.info(f"Removed corrupted schema history file: {history_file}")
+                except Exception as rm_error:
+                    logger.error(f"Failed to remove corrupted history file: {rm_error}")
             except Exception as e:
                 logger.warning(f"Failed to load schema history: {e}")
 

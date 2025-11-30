@@ -62,21 +62,21 @@ def main():
     # Register all tools
     register_all_tools(mcp)
 
+    # Get the ASGI application
+    mcp_app = mcp.streamable_http_app()
+
+    # Always add CORS middleware for browser compatibility
+    mcp_app.add_middleware(
+        CORSMiddleware,
+        allow_origins=["*"],
+        allow_credentials=True,
+        allow_methods=["*"],
+        allow_headers=["*"],
+    )
+
     # Setup authentication middleware if enabled
     if settings.MCP_AUTH_ENABLED:
         logger.info("Setting up authentication middleware")
-
-        # Récupérez l'application ASGI via streamable_http_app
-        mcp_app = mcp.streamable_http_app()
-
-        # Ajoutez les middlewares
-        mcp_app.add_middleware(
-            CORSMiddleware,
-            allow_origins=["*"],
-            allow_credentials=True,
-            allow_methods=["*"],
-            allow_headers=["*"],
-        )
         mcp_app.add_middleware(AuthenticationMiddleware)
 
     logger.info(
