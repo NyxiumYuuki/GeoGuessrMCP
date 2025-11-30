@@ -10,7 +10,9 @@ import sys
 
 import uvicorn
 from mcp.server.fastmcp import FastMCP
+from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.middleware.cors import CORSMiddleware
+from starlette.requests import Request
 
 from .config import settings
 from .middleware import AuthenticationMiddleware
@@ -23,6 +25,24 @@ logging.basicConfig(
     handlers=[logging.StreamHandler(sys.stdout)],
 )
 logger = logging.getLogger(__name__)
+
+
+class RequestLoggingMiddleware(BaseHTTPMiddleware):
+    """Log request details for debugging."""
+
+    async def dispatch(self, request: Request, call_next):
+        """Log request and response details."""
+        logger.debug(f"Request: {request.method} {request.url.path}")
+        logger.debug(f"Headers: {dict(request.headers)}")
+
+        response = await call_next(request)
+
+        if response.status_code >= 400:
+            logger.warning(
+                f"Error response: {request.method} {request.url.path} -> {response.status_code}"
+            )
+
+        return response
 
 
 def main():
@@ -71,6 +91,10 @@ def main():
         logger.error("Unsupported transport: %s", settings.TRANSPORT)
         return
 
+    # Add request logging middleware for debugging (first, so it logs everything)
+    if settings.LOG_LEVEL == "DEBUG":
+        mcp_app.add_middleware(RequestLoggingMiddleware)
+
     # Always add CORS middleware for browser compatibility
     mcp_app.add_middleware(
         CORSMiddleware,
@@ -110,6 +134,7 @@ def main():
         host=settings.HOST,
         port=settings.PORT,
         log_level=settings.LOG_LEVEL.lower(),
+        access_log=True,
     )
 
 
