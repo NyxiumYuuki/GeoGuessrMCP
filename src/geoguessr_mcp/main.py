@@ -21,7 +21,6 @@ logging.basicConfig(
     format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
     handlers=[logging.StreamHandler(sys.stdout)],
 )
-
 logger = logging.getLogger(__name__)
 
 
@@ -30,7 +29,7 @@ def main():
 
     # Create the MCP server instance
     mcp = FastMCP(
-        "GeoGuessr Analyzer",
+        "GeoGuessr MCP",
         instructions="""
         MCP server for analyzing GeoGuessr game statistics and optimizing gameplay strategy.
 
@@ -63,7 +62,13 @@ def main():
     register_all_tools(mcp)
 
     # Get the ASGI application
-    mcp_app = mcp.streamable_http_app()
+    if settings.TRANSPORT == "streamable-http":
+        mcp_app = mcp.streamable_http_app()
+    elif settings.TRANSPORT == "sse":
+        mcp_app = mcp.sse_app()
+    else:
+        logger.error("Unsupported transport: %s", settings.TRANSPORT)
+        return
 
     # Always add CORS middleware for browser compatibility
     mcp_app.add_middleware(
