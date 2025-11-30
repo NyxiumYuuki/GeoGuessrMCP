@@ -8,6 +8,7 @@ with automatic API monitoring and dynamic schema adaptation.
 import logging
 import sys
 
+import uvicorn
 from mcp.server.fastmcp import FastMCP
 from starlette.middleware.cors import CORSMiddleware
 
@@ -103,8 +104,24 @@ def main():
             "Users will need to login or provide a cookie."
         )
 
-    # Run the server
-    mcp.run(transport=settings.TRANSPORT)
+    # Run the server with the modified app (with middleware)
+    # Note: We cannot use mcp.run() as it creates a new app instance without our middleware
+    if settings.TRANSPORT == "streamable-http":
+        # Run uvicorn directly with our middleware-enhanced app
+        uvicorn.run(
+            mcp_app,
+            host=settings.HOST,
+            port=settings.PORT,
+            log_level=settings.LOG_LEVEL.lower(),
+        )
+    else:
+        # For other transports (SSE), use the default run method
+        # Note: SSE transport may not support custom middleware
+        logger.warning(
+            "Using mcp.run() for non-streamable-http transport. "
+            "CORS middleware may not be applied."
+        )
+        mcp.run(transport=settings.TRANSPORT)
 
 
 if __name__ == "__main__":
