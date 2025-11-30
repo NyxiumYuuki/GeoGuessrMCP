@@ -54,6 +54,11 @@ class AuthenticationMiddleware(BaseHTTPMiddleware):
         if request.url.path == "/health":
             return await call_next(request)
 
+        # Skip authentication for OPTIONS requests (CORS preflight)
+        # OPTIONS requests don't include Authorization headers by design
+        if request.method == "OPTIONS":
+            return await call_next(request)
+
         # Check for Authorization header
         auth_header = request.headers.get("Authorization")
 
