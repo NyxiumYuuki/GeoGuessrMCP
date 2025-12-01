@@ -4,8 +4,8 @@ GeoGuessr API Endpoints Registry.
 Centralized endpoint definitions with metadata for dynamic discovery and routing.
 """
 
+from collections.abc import Callable
 from dataclasses import dataclass
-from typing import Callable, Optional
 
 from ..config import settings
 
@@ -19,7 +19,7 @@ class EndpointInfo:
     description: str = ""
     auth_required: bool = True
     use_game_server: bool = False
-    params_builder: Optional[Callable[..., dict]] = None
+    params_builder: Callable[..., dict] | None = None
 
 
 class Endpoints:

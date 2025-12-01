@@ -11,8 +11,8 @@ offers asynchronous execution for efficient performance.
 
 from mcp.server.fastmcp import FastMCP
 
-from .auth_tools import get_current_session_token
 from ..services.analysis_service import AnalysisService
+from .auth_tools import get_current_session_token
 
 
 def register_analysis_tools(mcp: FastMCP, analysis_service: AnalysisService):

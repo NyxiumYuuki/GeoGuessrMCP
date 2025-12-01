@@ -6,7 +6,7 @@ a schema field, including its name, type, and other relevant metadata.
 """
 
 from dataclasses import dataclass
-from typing import Any, Optional
+from typing import Any
 
 
 @dataclass
@@ -16,6 +16,6 @@ class SchemaField:
     name: str
     field_type: str
     nullable: bool = False
-    nested_schema: Optional[dict] = None
+    nested_schema: dict | None = None
     example_value: Any = None
     description: str = ""

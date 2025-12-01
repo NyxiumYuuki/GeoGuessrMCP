@@ -13,8 +13,8 @@ Functions:
 
 from mcp.server.fastmcp import FastMCP
 
-from .auth_tools import get_current_session_token
 from ..services.game_service import GameService
+from .auth_tools import get_current_session_token
 
 
 def register_game_tools(mcp: FastMCP, game_service: GameService):
@@ -99,7 +99,7 @@ def register_game_tools(mcp: FastMCP, game_service: GameService):
             "summary": {
                 "total_score": sum(g.total_score for g in games),
                 "average_score": sum(g.total_score for g in games) / len(games) if games else 0,
-                "maps_played": list(set(g.map_name for g in games)),
+                "maps_played": list({g.map_name for g in games}),
             },
         }
 

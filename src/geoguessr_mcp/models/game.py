@@ -1,7 +1,6 @@
 """Game-related data models."""
 
 from dataclasses import dataclass, field
-from typing import Optional
 
 from .round_guess import RoundGuess
 
@@ -15,7 +14,7 @@ class Game:
     mode: str
     total_score: int
     rounds: list[RoundGuess] = field(default_factory=list)
-    created_at: Optional[str] = None
+    created_at: str | None = None
     finished: bool = False
     raw_data: dict = field(default_factory=dict)
 

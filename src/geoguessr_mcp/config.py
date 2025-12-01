@@ -2,7 +2,6 @@
 
 import os
 from dataclasses import dataclass, field
-from typing import Optional
 
 
 @dataclass
@@ -18,7 +17,7 @@ class Settings:
     GEOGUESSR_DOMAIN_NAME: str = "geoguessr.com"
     GEOGUESSR_API_URL: str = "https://www.geoguessr.com/api"
     GAME_SERVER_URL: str = "https://game-server.geoguessr.com/api"
-    DEFAULT_NCFA_COOKIE: Optional[str] = field(
+    DEFAULT_NCFA_COOKIE: str | None = field(
         default_factory=lambda: os.getenv("GEOGUESSR_NCFA_COOKIE")
     )
 
@@ -30,14 +29,14 @@ class Settings:
         default_factory=lambda: int(os.getenv("MONITORING_INTERVAL_HOURS", "24"))
     )
     SCHEMA_CACHE_DIR: str = field(
-        default_factory=lambda: os.getenv("SCHEMA_CACHE_DIR", "/app/data/schemas")
+        default_factory=lambda: os.getenv("SCHEMA_CACHE_DIR", "./data/schemas")
     )
 
     # Authentication Configuration
     MCP_AUTH_ENABLED: bool = field(
         default_factory=lambda: os.getenv("MCP_AUTH_ENABLED", "false").lower() == "true"
     )
-    MCP_API_KEYS: Optional[str] = field(default_factory=lambda: os.getenv("MCP_API_KEYS"))
+    MCP_API_KEYS: str | None = field(default_factory=lambda: os.getenv("MCP_API_KEYS"))
 
     # Logging Configuration
     LOG_LEVEL: str = field(default_factory=lambda: os.getenv("LOG_LEVEL", "INFO"))

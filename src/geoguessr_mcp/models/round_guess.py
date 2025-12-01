@@ -1,7 +1,6 @@
 """RoundGuess-related data models."""
 
 from dataclasses import dataclass
-from typing import Optional
 
 
 @dataclass
@@ -12,8 +11,8 @@ class RoundGuess:
     score: int
     distance_meters: float
     time_seconds: int
-    lat: Optional[float] = None
-    lng: Optional[float] = None
+    lat: float | None = None
+    lng: float | None = None
     country: str = ""
 
     @classmethod

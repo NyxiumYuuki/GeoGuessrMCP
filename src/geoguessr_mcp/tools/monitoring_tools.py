@@ -10,8 +10,8 @@ evolution.
 
 from mcp.server.fastmcp import FastMCP
 
-from .auth_tools import get_current_session_token
 from ..monitoring import endpoint_monitor, schema_registry
+from .auth_tools import get_current_session_token
 
 
 def register_monitoring_tools(mcp: FastMCP):

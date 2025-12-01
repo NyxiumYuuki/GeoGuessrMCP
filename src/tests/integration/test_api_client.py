@@ -10,7 +10,7 @@ from unittest.mock import AsyncMock, MagicMock, patch
 import httpx
 import pytest
 
-from geoguessr_mcp.api import DynamicResponse, GeoGuessrClient, EndpointInfo, Endpoints
+from geoguessr_mcp.api import DynamicResponse, EndpointInfo, Endpoints, GeoGuessrClient
 from geoguessr_mcp.config import settings
 
 

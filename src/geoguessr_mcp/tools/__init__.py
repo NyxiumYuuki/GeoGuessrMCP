@@ -2,17 +2,17 @@
 
 from mcp.server.fastmcp import FastMCP
 
-from .analysis_tools import register_analysis_tools
-from .auth_tools import register_auth_tools
-from .game_tools import register_game_tools
-from .monitoring_tools import register_monitoring_tools
-from .profile_tools import register_profile_tools
 from ..api.geoguessr_client import GeoGuessrClient
 from ..auth.session import SessionManager
 from ..config import settings
 from ..services.analysis_service import AnalysisService
 from ..services.game_service import GameService
 from ..services.profile_service import ProfileService
+from .analysis_tools import register_analysis_tools
+from .auth_tools import register_auth_tools
+from .game_tools import register_game_tools
+from .monitoring_tools import register_monitoring_tools
+from .profile_tools import register_profile_tools
 
 
 def register_all_tools(mcp: FastMCP) -> dict:

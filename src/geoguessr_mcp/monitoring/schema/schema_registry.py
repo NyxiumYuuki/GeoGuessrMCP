@@ -15,11 +15,11 @@ import logging
 import tempfile
 from datetime import UTC, datetime
 from pathlib import Path
-from typing import Any, Optional
+from typing import Any
 
+from ...config import settings
 from .endpoint_schema import EndpointSchema
 from .schema_detector import SchemaDetector
-from ...config import settings
 
 logger = logging.getLogger(__name__)
 
@@ -32,7 +32,7 @@ class SchemaRegistry:
     to track changes over time and adapt automatically.
     """
 
-    def __init__(self, cache_dir: Optional[str] = None):
+    def __init__(self, cache_dir: str | None = None):
         self.cache_dir = Path(cache_dir or settings.SCHEMA_CACHE_DIR)
 
         # Try to create the cache directory, fall back to temp if permission denied
@@ -71,6 +71,16 @@ class SchemaRegistry:
                     for endpoint, schema_data in data.items():
                         self.schemas[endpoint] = EndpointSchema.from_dict(schema_data)
                 logger.info(f"Loaded {len(self.schemas)} cached schemas")
+            except json.JSONDecodeError as e:
+                logger.warning(
+                    f"Failed to load cached schemas due to corrupted JSON: {e}. "
+                    f"Removing corrupted cache file."
+                )
+                try:
+                    schema_file.unlink()
+                    logger.info(f"Removed corrupted schema cache file: {schema_file}")
+                except Exception as rm_error:
+                    logger.error(f"Failed to remove corrupted cache file: {rm_error}")
             except Exception as e:
                 logger.warning(f"Failed to load cached schemas: {e}")
 
@@ -83,6 +93,16 @@ class SchemaRegistry:
                         self.schema_history[endpoint] = [
                             EndpointSchema.from_dict(h) for h in history
                         ]
+            except json.JSONDecodeError as e:
+                logger.warning(
+                    f"Failed to load schema history due to corrupted JSON: {e}. "
+                    f"Removing corrupted history file."
+                )
+                try:
+                    history_file.unlink()
+                    logger.info(f"Removed corrupted schema history file: {history_file}")
+                except Exception as rm_error:
+                    logger.error(f"Failed to remove corrupted history file: {rm_error}")
             except Exception as e:
                 logger.warning(f"Failed to load schema history: {e}")
 
@@ -167,7 +187,7 @@ class SchemaRegistry:
             )
         self._save_schemas()
 
-    def get_schema(self, endpoint: str) -> Optional[EndpointSchema]:
+    def get_schema(self, endpoint: str) -> EndpointSchema | None:
         """Get the current schema for an endpoint."""
         return self.schemas.get(endpoint)
 

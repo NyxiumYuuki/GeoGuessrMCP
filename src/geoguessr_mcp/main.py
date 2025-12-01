@@ -9,7 +9,9 @@ import logging
 import sys
 
 from mcp.server.fastmcp import FastMCP
+from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.middleware.cors import CORSMiddleware
+from starlette.requests import Request
 
 from .config import settings
 from .middleware import AuthenticationMiddleware
@@ -21,8 +23,25 @@ logging.basicConfig(
     format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
     handlers=[logging.StreamHandler(sys.stdout)],
 )
-
 logger = logging.getLogger(__name__)
+
+
+class RequestLoggingMiddleware(BaseHTTPMiddleware):
+    """Log request details for debugging."""
+
+    async def dispatch(self, request: Request, call_next):
+        """Log request and response details."""
+        logger.debug(f"Request: {request.method} {request.url.path}")
+        logger.debug(f"Headers: {dict(request.headers)}")
+
+        response = await call_next(request)
+
+        if response.status_code >= 400:
+            logger.warning(
+                f"Error response: {request.method} {request.url.path} -> {response.status_code}"
+            )
+
+        return response
 
 
 def main():
@@ -30,7 +49,7 @@ def main():
 
     # Create the MCP server instance
     mcp = FastMCP(
-        "GeoGuessr Analyzer",
+        "GeoGuessr MCP",
         instructions="""
         MCP server for analyzing GeoGuessr game statistics and optimizing gameplay strategy.
 
@@ -62,22 +81,62 @@ def main():
     # Register all tools
     register_all_tools(mcp)
 
-    # Setup authentication middleware if enabled
-    if settings.MCP_AUTH_ENABLED:
-        logger.info("Setting up authentication middleware")
+    # Wrap the streamable_http_app method to inject middleware
+    _original_streamable_http_app = mcp.streamable_http_app
 
-        # Récupérez l'application ASGI via streamable_http_app
-        mcp_app = mcp.streamable_http_app()
+    def _streamable_http_app_with_middleware():
+        """Wrap app creation to inject middleware."""
+        app = _original_streamable_http_app()
 
-        # Ajoutez les middlewares
-        mcp_app.add_middleware(
+        # Add request logging middleware for debugging (first in chain)
+        if settings.LOG_LEVEL == "DEBUG":
+            app.add_middleware(RequestLoggingMiddleware)
+
+        # Always add CORS middleware for browser compatibility
+        app.add_middleware(
             CORSMiddleware,
             allow_origins=["*"],
             allow_credentials=True,
             allow_methods=["*"],
             allow_headers=["*"],
+            expose_headers=["mcp-session-id", "mcp-protocol-version"],
         )
-        mcp_app.add_middleware(AuthenticationMiddleware)
+
+        # Add authentication middleware if enabled
+        if settings.MCP_AUTH_ENABLED:
+            app.add_middleware(AuthenticationMiddleware)
+
+        return app
+
+    # Replace the method with our wrapper
+    mcp.streamable_http_app = _streamable_http_app_with_middleware
+
+    # Also wrap sse_app for SSE transport
+    if hasattr(mcp, "sse_app"):
+        _original_sse_app = mcp.sse_app
+
+        def _sse_app_with_middleware():
+            """Wrap SSE app creation to inject middleware."""
+            app = _original_sse_app()
+
+            if settings.LOG_LEVEL == "DEBUG":
+                app.add_middleware(RequestLoggingMiddleware)
+
+            app.add_middleware(
+                CORSMiddleware,
+                allow_origins=["*"],
+                allow_credentials=True,
+                allow_methods=["*"],
+                allow_headers=["*"],
+                expose_headers=["mcp-session-id", "mcp-protocol-version"],
+            )
+
+            if settings.MCP_AUTH_ENABLED:
+                app.add_middleware(AuthenticationMiddleware)
+
+            return app
+
+        mcp.sse_app = _sse_app_with_middleware
 
     logger.info(
         f"Starting GeoGuessr MCP Server on {settings.HOST}:{settings.PORT} "
@@ -98,7 +157,7 @@ def main():
             "Users will need to login or provide a cookie."
         )
 
-    # Run the server
+    # Run the server - middleware will be applied via our wrapper
     mcp.run(transport=settings.TRANSPORT)
 
 

@@ -7,13 +7,12 @@ dynamic data handling and LLM-friendly output formatting.
 
 import logging
 from dataclasses import dataclass, field
-from typing import Optional
 
-from .game_service import GameService
-from .profile_service import ProfileService
 from ..api import GeoGuessrClient
 from ..models import Game
 from ..monitoring import schema_registry
+from .game_service import GameService
+from .profile_service import ProfileService
 
 logger = logging.getLogger(__name__)
 
@@ -61,8 +60,8 @@ class AnalysisService:
     def __init__(
         self,
         client: GeoGuessrClient,
-        game_service: Optional[GameService] = None,
-        profile_service: Optional[ProfileService] = None,
+        game_service: GameService | None = None,
+        profile_service: ProfileService | None = None,
     ):
         self.client = client
         self.game_service = game_service or GameService(client)
@@ -155,7 +154,7 @@ class AnalysisService:
     async def analyze_recent_games(
         self,
         count: int = 10,
-        session_token: Optional[str] = None,
+        session_token: str | None = None,
     ) -> dict:
         """
         Analyze recent games and provide statistics summary.
@@ -181,7 +180,7 @@ class AnalysisService:
 
     async def get_performance_summary(
         self,
-        session_token: Optional[str] = None,
+        session_token: str | None = None,
     ) -> dict:
         """
         Get a comprehensive performance summary.
@@ -246,7 +245,7 @@ class AnalysisService:
 
     async def get_strategy_recommendations(
         self,
-        session_token: Optional[str] = None,
+        session_token: str | None = None,
     ) -> dict:
         """
         Generate strategy recommendations based on performance analysis.

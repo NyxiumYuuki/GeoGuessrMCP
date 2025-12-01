@@ -6,9 +6,8 @@ dynamic schema adaptation.
 """
 
 import logging
-from typing import Optional
 
-from ..api import DynamicResponse, GeoGuessrClient, Endpoints
+from ..api import DynamicResponse, Endpoints, GeoGuessrClient
 from ..models import Achievement, UserProfile, UserStats
 
 logger = logging.getLogger(__name__)
@@ -22,7 +21,7 @@ class ProfileService:
 
     async def get_profile(
         self,
-        session_token: Optional[str] = None,
+        session_token: str | None = None,
     ) -> tuple[UserProfile, DynamicResponse]:
         """
         Get current user's profile.
@@ -40,7 +39,7 @@ class ProfileService:
 
     async def get_stats(
         self,
-        session_token: Optional[str] = None,
+        session_token: str | None = None,
     ) -> tuple[UserStats, DynamicResponse]:
         """
         Get user statistics.
@@ -58,7 +57,7 @@ class ProfileService:
 
     async def get_extended_stats(
         self,
-        session_token: Optional[str] = None,
+        session_token: str | None = None,
     ) -> DynamicResponse:
         """
         Get extended statistics.
@@ -69,7 +68,7 @@ class ProfileService:
 
     async def get_achievements(
         self,
-        session_token: Optional[str] = None,
+        session_token: str | None = None,
     ) -> tuple[list[Achievement], DynamicResponse]:
         """
         Get user achievements.
@@ -96,7 +95,7 @@ class ProfileService:
     async def get_public_profile(
         self,
         user_id: str,
-        session_token: Optional[str] = None,
+        session_token: str | None = None,
     ) -> tuple[UserProfile, DynamicResponse]:
         """Get another user's public profile."""
         endpoint = Endpoints.PROFILES.get_public_profile(user_id)
@@ -110,14 +109,14 @@ class ProfileService:
 
     async def get_user_maps(
         self,
-        session_token: Optional[str] = None,
+        session_token: str | None = None,
     ) -> DynamicResponse:
         """Get user's custom maps."""
         return await self.client.get(Endpoints.PROFILES.GET_USER_MAPS, session_token)
 
     async def get_comprehensive_profile(
         self,
-        session_token: Optional[str] = None,
+        session_token: str | None = None,
     ) -> dict:
         """
         Get a comprehensive profile combining multiple endpoints.

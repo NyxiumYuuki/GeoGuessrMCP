@@ -11,7 +11,7 @@ schema information.
 import logging
 from dataclasses import dataclass, field
 from datetime import UTC, datetime
-from typing import Any, Optional
+from typing import Any
 
 from .schema_field import SchemaField
 
@@ -29,8 +29,8 @@ class EndpointSchema:
     schema_hash: str = ""
     response_code: int = 200
     is_available: bool = True
-    error_message: Optional[str] = None
-    sample_response: Optional[dict] = None
+    error_message: str | None = None
+    sample_response: dict | None = None
 
     def to_dict(self) -> dict:
         """Convert to dictionary for serialization."""

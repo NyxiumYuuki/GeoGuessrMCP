@@ -1,7 +1,6 @@
 """UserProfile-related data models."""
 
 from dataclasses import dataclass, field
-from typing import Optional
 
 
 @dataclass
@@ -16,7 +15,7 @@ class UserProfile:
     created: str = ""
     is_verified: bool = False
     is_pro: bool = False
-    avatar_url: Optional[str] = None
+    avatar_url: str | None = None
     raw_data: dict = field(default_factory=dict)
 
     @classmethod

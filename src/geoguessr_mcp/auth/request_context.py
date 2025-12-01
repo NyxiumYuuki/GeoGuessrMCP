@@ -7,12 +7,11 @@ the authenticated user making the request.
 """
 
 from contextvars import ContextVar
-from typing import Optional
 
 from .user_context import UserContext
 
 # Context variable to store the current user context
-_current_user_context: ContextVar[Optional[UserContext]] = ContextVar(
+_current_user_context: ContextVar[UserContext | None] = ContextVar(
     "current_user_context", default=None
 )
 
@@ -30,7 +29,7 @@ def set_current_user_context(context: UserContext) -> None:
     _current_user_context.set(context)
 
 
-def get_current_user_context() -> Optional[UserContext]:
+def get_current_user_context() -> UserContext | None:
     """
     Get the current user context.
 
