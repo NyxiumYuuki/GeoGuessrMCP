@@ -86,7 +86,6 @@ def main():
 
     def _streamable_http_app_with_middleware():
         """Wrap app creation to inject middleware."""
-
         app = _original_streamable_http_app()
 
         # Add request logging middleware for debugging (first in chain)
@@ -100,7 +99,9 @@ def main():
             allow_credentials=True,
             allow_methods=["*"],
             allow_headers=["*"],
+            expose_headers=["mcp-session-id", "mcp-protocol-version"],
         )
+
         # Add authentication middleware if enabled
         if settings.MCP_AUTH_ENABLED:
             app.add_middleware(AuthenticationMiddleware)
@@ -117,6 +118,7 @@ def main():
         def _sse_app_with_middleware():
             """Wrap SSE app creation to inject middleware."""
             app = _original_sse_app()
+
             if settings.LOG_LEVEL == "DEBUG":
                 app.add_middleware(RequestLoggingMiddleware)
 
@@ -126,10 +128,12 @@ def main():
                 allow_credentials=True,
                 allow_methods=["*"],
                 allow_headers=["*"],
-
+                expose_headers=["mcp-session-id", "mcp-protocol-version"],
             )
+
             if settings.MCP_AUTH_ENABLED:
                 app.add_middleware(AuthenticationMiddleware)
+
             return app
 
         mcp.sse_app = _sse_app_with_middleware
@@ -144,6 +148,7 @@ def main():
         logger.info(f"MCP server authentication is ENABLED with {api_key_count} API key(s)")
     else:
         logger.warning("MCP server authentication is DISABLED - server is publicly accessible")
+
     if settings.DEFAULT_NCFA_COOKIE:
         logger.info("Default GeoGuessr authentication cookie configured from environment")
     else:
