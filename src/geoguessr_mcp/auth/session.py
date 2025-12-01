@@ -7,7 +7,6 @@ import logging
 import secrets
 from dataclasses import dataclass, field
 from datetime import UTC, datetime, timedelta
-from typing import Optional
 
 import httpx
 
@@ -25,7 +24,7 @@ class UserSession:
     username: str
     email: str
     created_at: datetime = field(default_factory=datetime.now)
-    expires_at: Optional[datetime] = None
+    expires_at: datetime | None = None
 
     def is_valid(self) -> bool:
         """Check if the session is still valid."""
@@ -37,10 +36,10 @@ class UserSession:
 class SessionManager:
     """Manages user sessions for the MCP server."""
 
-    def __init__(self, default_cookie: Optional[str] = None):
+    def __init__(self, default_cookie: str | None = None):
         self._sessions: dict[str, UserSession] = {}
         self._user_sessions: dict[str, str] = {}
-        self._default_cookie: Optional[str] = default_cookie or settings.DEFAULT_NCFA_COOKIE
+        self._default_cookie: str | None = default_cookie or settings.DEFAULT_NCFA_COOKIE
         self._lock = asyncio.Lock()
 
     @staticmethod
@@ -111,7 +110,7 @@ class SessionManager:
             return session_token, session
 
     @staticmethod
-    def _extract_ncfa_cookie(response: httpx.Response) -> Optional[str]:
+    def _extract_ncfa_cookie(response: httpx.Response) -> str | None:
         """Extract _ncfa cookie from response."""
         # Try cookies jar first
         for cookie in response.cookies.jar:
@@ -160,7 +159,7 @@ class SessionManager:
                 return True
             return False
 
-    async def get_session(self, session_token: Optional[str] = None) -> Optional[UserSession]:
+    async def get_session(self, session_token: str | None = None) -> UserSession | None:
         """
         Get a session by token or return default if available.
 
@@ -203,7 +202,7 @@ class SessionManager:
             logger.info("Default NCFA cookie updated")
 
     @staticmethod
-    async def validate_cookie(cookie: str) -> Optional[dict]:
+    async def validate_cookie(cookie: str) -> dict | None:
         """
         Validate a cookie by making a test request.
 

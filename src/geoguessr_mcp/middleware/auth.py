@@ -6,7 +6,6 @@ and attaches user context for multi-user support.
 """
 
 import logging
-from typing import Optional
 
 from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.requests import Request
@@ -26,7 +25,7 @@ class AuthenticationMiddleware(BaseHTTPMiddleware):
     Authorization header with a Bearer token matching one of the configured API keys.
     """
 
-    def __init__(self, app, valid_api_keys: Optional[set[str]] = None):
+    def __init__(self, app, valid_api_keys: set[str] | None = None):
         super().__init__(app)
         self.valid_api_keys = valid_api_keys or settings.get_api_keys()
         self.enabled = settings.MCP_AUTH_ENABLED

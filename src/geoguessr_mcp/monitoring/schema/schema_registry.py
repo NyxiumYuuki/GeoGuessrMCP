@@ -15,7 +15,7 @@ import logging
 import tempfile
 from datetime import UTC, datetime
 from pathlib import Path
-from typing import Any, Optional
+from typing import Any
 
 from .endpoint_schema import EndpointSchema
 from .schema_detector import SchemaDetector
@@ -32,7 +32,7 @@ class SchemaRegistry:
     to track changes over time and adapt automatically.
     """
 
-    def __init__(self, cache_dir: Optional[str] = None):
+    def __init__(self, cache_dir: str | None = None):
         self.cache_dir = Path(cache_dir or settings.SCHEMA_CACHE_DIR)
 
         # Try to create the cache directory, fall back to temp if permission denied
@@ -187,7 +187,7 @@ class SchemaRegistry:
             )
         self._save_schemas()
 
-    def get_schema(self, endpoint: str) -> Optional[EndpointSchema]:
+    def get_schema(self, endpoint: str) -> EndpointSchema | None:
         """Get the current schema for an endpoint."""
         return self.schemas.get(endpoint)
 

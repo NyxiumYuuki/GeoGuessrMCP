@@ -9,7 +9,7 @@ from geoguessr_mcp.api import GeoGuessrClient
 from geoguessr_mcp.api.dynamic_response import DynamicResponse
 from geoguessr_mcp.auth import SessionManager, UserSession
 from geoguessr_mcp.config import settings
-from geoguessr_mcp.models import RoundGuess, Game
+from geoguessr_mcp.models import Game, RoundGuess
 from geoguessr_mcp.services import AnalysisService, GameService, ProfileService
 
 

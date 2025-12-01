@@ -11,7 +11,7 @@ feeds, recent games, season statistics, and daily challenges.
 
 import pytest
 
-from geoguessr_mcp.models import Game, SeasonStats, DailyChallenge
+from geoguessr_mcp.models import DailyChallenge, Game, SeasonStats
 
 
 class TestGameService:

@@ -7,11 +7,10 @@ where each API key can have its own GeoGuessr session.
 
 import asyncio
 import logging
-from typing import Optional
 
-from ..config import settings
 from .session import SessionManager, UserSession
 from .user_context import UserContext
+from ..config import settings
 
 logger = logging.getLogger(__name__)
 
@@ -146,7 +145,7 @@ class MultiUserSessionManager:
 
         return True
 
-    async def get_session_for_api_key(self, api_key: str) -> Optional[UserSession]:
+    async def get_session_for_api_key(self, api_key: str) -> UserSession | None:
         """
         Get the active session for a specific API key.
 

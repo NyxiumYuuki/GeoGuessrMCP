@@ -12,9 +12,9 @@ Classes:
 """
 
 import asyncio
+import contextlib
 import logging
 from datetime import UTC, datetime
-from typing import Optional
 
 import httpx
 
@@ -119,14 +119,14 @@ class EndpointMonitor:
 
     def __init__(
         self,
-        registry: Optional[SchemaRegistry] = None,
-        ncfa_cookie: Optional[str] = None,
+            registry: SchemaRegistry | None = None,
+            ncfa_cookie: str | None = None,
     ):
         self.registry = registry or schema_registry
         self.ncfa_cookie = ncfa_cookie or settings.DEFAULT_NCFA_COOKIE
         self.results: list[MonitoringResult] = []
         self._running = False
-        self._task: Optional[asyncio.Task] = None
+        self._task: asyncio.Task | None = None
 
     async def check_endpoint(
         self,
@@ -286,10 +286,8 @@ class EndpointMonitor:
         self._running = False
         if self._task:
             self._task.cancel()
-            try:
+            with contextlib.suppress(asyncio.CancelledError):
                 await self._task
-            except asyncio.CancelledError:
-                pass
         logger.info("Stopped periodic monitoring")
 
     async def _monitoring_loop(self) -> None:

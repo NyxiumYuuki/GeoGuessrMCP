@@ -8,7 +8,6 @@ an endpoint, including its availability, response time, and any errors encounter
 
 from dataclasses import dataclass, field
 from datetime import UTC, datetime
-from typing import Optional
 
 
 @dataclass
@@ -20,5 +19,5 @@ class MonitoringResult:
     response_code: int
     response_time_ms: float
     schema_changed: bool
-    error_message: Optional[str] = None
+    error_message: str | None = None
     timestamp: datetime = field(default_factory=lambda: datetime.now(UTC))

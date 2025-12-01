@@ -1,7 +1,6 @@
 """DailyChallenge-related data models."""
 
 from dataclasses import dataclass, field
-from typing import Optional
 
 
 @dataclass
@@ -13,7 +12,7 @@ class DailyChallenge:
     date: str = ""
     time_limit: int = 0
     completed: bool = False
-    score: Optional[int] = None
+    score: int | None = None
     raw_data: dict = field(default_factory=dict)
 
     @classmethod

@@ -187,7 +187,7 @@ class TestAuthenticationFlow:
         assert "expired_user" not in session_manager._user_sessions
 
     @pytest.mark.asyncio
-    async def test_default_cookie_fallback(self, session_manager):
+    async def test_default_cookie_fallback(self):
         """Test falling back to default cookie when no session exists."""
         # Create manager with default cookie
         manager_with_default = SessionManager(default_cookie="default_test_cookie")

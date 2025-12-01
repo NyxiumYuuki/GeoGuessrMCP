@@ -9,7 +9,7 @@ operations.
 
 import pytest
 
-from geoguessr_mcp.models import UserProfile, UserStats, Achievement
+from geoguessr_mcp.models import Achievement, UserProfile, UserStats
 
 
 class TestProfileService:

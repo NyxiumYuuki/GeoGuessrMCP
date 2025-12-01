@@ -1,7 +1,6 @@
 """Achievement-related data models."""
 
 from dataclasses import dataclass
-from typing import Optional
 
 
 @dataclass
@@ -12,9 +11,9 @@ class Achievement:
     name: str
     description: str = ""
     unlocked: bool = False
-    unlocked_at: Optional[str] = None
+    unlocked_at: str | None = None
     progress: float = 0.0
-    icon_url: Optional[str] = None
+    icon_url: str | None = None
 
     @classmethod
     def from_api_response(cls, data: dict) -> "Achievement":

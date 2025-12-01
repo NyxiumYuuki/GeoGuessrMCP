@@ -26,8 +26,8 @@ class TestMultiUserSessionManager:
     @pytest.mark.asyncio
     async def test_get_user_context_reuses_existing_manager(self, manager):
         """Test that getting context for existing API key reuses the same manager."""
-        context1 = await manager.get_user_context("existing_key")
-        context2 = await manager.get_user_context("existing_key")
+        await manager.get_user_context("existing_key")
+        await manager.get_user_context("existing_key")
 
         # Should use the same manager instance
         assert manager._user_managers["existing_key"] is manager._user_managers["existing_key"]
@@ -36,9 +36,9 @@ class TestMultiUserSessionManager:
     @pytest.mark.asyncio
     async def test_multiple_api_keys_get_separate_managers(self, manager):
         """Test that different API keys get separate session managers."""
-        context1 = await manager.get_user_context("key1")
-        context2 = await manager.get_user_context("key2")
-        context3 = await manager.get_user_context("key3")
+        await manager.get_user_context("key1")
+        await manager.get_user_context("key2")
+        await manager.get_user_context("key3")
 
         assert len(manager._user_managers) == 3
         assert manager._user_managers["key1"] is not manager._user_managers["key2"]
@@ -61,7 +61,7 @@ class TestMultiUserSessionManager:
         assert session is None
 
     @pytest.mark.asyncio
-    async def test_login_user_creates_manager_if_not_exists(self, manager):
+    async def test_login_user_creates_manager_if_not_exists(self):
         """Test that login_user creates a manager if it doesn't exist."""
         # This test requires mocking the HTTP client for GeoGuessr API
         # We'll mark it as a placeholder for now

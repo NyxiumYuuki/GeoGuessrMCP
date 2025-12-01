@@ -1,10 +1,9 @@
 """Tests for UserContext class."""
 
-import pytest
+from datetime import UTC, datetime, timedelta
 
 from geoguessr_mcp.auth.session import UserSession
 from geoguessr_mcp.auth.user_context import UserContext
-from datetime import datetime, timedelta, UTC
 
 
 class TestUserContext:

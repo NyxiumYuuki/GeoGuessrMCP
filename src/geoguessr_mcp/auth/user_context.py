@@ -6,7 +6,6 @@ is making a request and their associated GeoGuessr session.
 """
 
 from dataclasses import dataclass
-from typing import Optional
 
 from .session import UserSession
 
@@ -23,7 +22,7 @@ class UserContext:
     api_key: str
     """The API key used to authenticate this request"""
 
-    session: Optional[UserSession] = None
+    session: UserSession | None = None
     """The GeoGuessr session for this user (if logged in)"""
 
     @property
@@ -41,7 +40,7 @@ class UserContext:
         return f"User-{hash(self.api_key) % 10000:04d}"
 
     @property
-    def ncfa_cookie(self) -> Optional[str]:
+    def ncfa_cookie(self) -> str | None:
         """Get the NCFA cookie for this user."""
         if self.session:
             return self.session.ncfa_cookie
