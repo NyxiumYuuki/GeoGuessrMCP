@@ -65,6 +65,7 @@ class TestMultiUserSessionManager:
         """Test that login_user creates a manager if it doesn't exist."""
         # This test requires mocking the HTTP client for GeoGuessr API
         # We'll mark it as a placeholder for now
+        # TODO: Add test for this
         pytest.skip("Requires mocking GeoGuessr API")
 
     @pytest.mark.asyncio
