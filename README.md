@@ -465,6 +465,16 @@ geoguessr-mcp/
 └── Dockerfile
 ```
 
+### MCP Inspector Tool Test
+
+Tool to inspect MCP server and test connectivity:
+Using the [Inspector](https://github.com/modelcontextprotocol/inspector) tool from the MCP project.
+Via Docker:
+
+```bash
+docker run --rm -p 6274:6274 -p 6277:6277 -e HOST=0.0.0.0 ghcr.io/modelcontextprotocol/inspector:latest
+```
+
 ## 🤝 Contributing
 
 Contributions are welcome! Please:

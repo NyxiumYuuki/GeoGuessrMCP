@@ -47,32 +47,7 @@ class RequestLoggingMiddleware(BaseHTTPMiddleware):
 def main():
     """Main entry point for the server."""
 
-    # Prepare middleware list
-    from starlette.middleware import Middleware
-
-    middleware_list = []
-
-    # Add request logging middleware for debugging (first in chain)
-    if settings.LOG_LEVEL == "DEBUG":
-        middleware_list.append(Middleware(RequestLoggingMiddleware))
-
-    # Always add CORS middleware for browser compatibility
-    middleware_list.append(
-        Middleware(
-            CORSMiddleware,
-            allow_origins=["*"],
-            allow_credentials=True,
-            allow_methods=["*"],
-            allow_headers=["*"],
-        )
-    )
-
-    # Add authentication middleware if enabled
-    if settings.MCP_AUTH_ENABLED:
-        logger.info("Setting up authentication middleware")
-        middleware_list.append(Middleware(AuthenticationMiddleware))
-
-    # Create the MCP server instance with middleware
+    # Create the MCP server instance
     mcp = FastMCP(
         "GeoGuessr MCP",
         instructions="""
@@ -106,6 +81,59 @@ def main():
     # Register all tools
     register_all_tools(mcp)
 
+    # Wrap the streamable_http_app method to inject middleware
+    _original_streamable_http_app = mcp.streamable_http_app
+
+    def _streamable_http_app_with_middleware():
+        """Wrap app creation to inject middleware."""
+
+        app = _original_streamable_http_app()
+
+        # Add request logging middleware for debugging (first in chain)
+        if settings.LOG_LEVEL == "DEBUG":
+            app.add_middleware(RequestLoggingMiddleware)
+
+        # Always add CORS middleware for browser compatibility
+        app.add_middleware(
+            CORSMiddleware,
+            allow_origins=["*"],
+            allow_credentials=True,
+            allow_methods=["*"],
+            allow_headers=["*"],
+        )
+        # Add authentication middleware if enabled
+        if settings.MCP_AUTH_ENABLED:
+            app.add_middleware(AuthenticationMiddleware)
+
+        return app
+
+    # Replace the method with our wrapper
+    mcp.streamable_http_app = _streamable_http_app_with_middleware
+
+    # Also wrap sse_app for SSE transport
+    if hasattr(mcp, "sse_app"):
+        _original_sse_app = mcp.sse_app
+
+        def _sse_app_with_middleware():
+            """Wrap SSE app creation to inject middleware."""
+            app = _original_sse_app()
+            if settings.LOG_LEVEL == "DEBUG":
+                app.add_middleware(RequestLoggingMiddleware)
+
+            app.add_middleware(
+                CORSMiddleware,
+                allow_origins=["*"],
+                allow_credentials=True,
+                allow_methods=["*"],
+                allow_headers=["*"],
+
+            )
+            if settings.MCP_AUTH_ENABLED:
+                app.add_middleware(AuthenticationMiddleware)
+            return app
+
+        mcp.sse_app = _sse_app_with_middleware
+
     logger.info(
         f"Starting GeoGuessr MCP Server on {settings.HOST}:{settings.PORT} "
         f"with {settings.TRANSPORT} transport"
@@ -116,7 +144,6 @@ def main():
         logger.info(f"MCP server authentication is ENABLED with {api_key_count} API key(s)")
     else:
         logger.warning("MCP server authentication is DISABLED - server is publicly accessible")
-
     if settings.DEFAULT_NCFA_COOKIE:
         logger.info("Default GeoGuessr authentication cookie configured from environment")
     else:
@@ -125,8 +152,8 @@ def main():
             "Users will need to login or provide a cookie."
         )
 
-    # Run the server with middleware support
-    mcp.run(transport=settings.TRANSPORT, middleware=middleware_list)
+    # Run the server - middleware will be applied via our wrapper
+    mcp.run(transport=settings.TRANSPORT)
 
 
 if __name__ == "__main__":
