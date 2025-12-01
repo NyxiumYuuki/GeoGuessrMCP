@@ -13,8 +13,8 @@ Functions:
 
 from mcp.server.fastmcp import FastMCP
 
-from .auth_tools import get_current_session_token
 from ..services.game_service import GameService
+from .auth_tools import get_current_session_token
 
 
 def register_game_tools(mcp: FastMCP, game_service: GameService):

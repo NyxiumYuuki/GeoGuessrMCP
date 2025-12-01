@@ -12,8 +12,8 @@ from the underlying service API. Tools return structured data for easy consumpti
 
 from mcp.server.fastmcp import FastMCP
 
-from .auth_tools import get_current_session_token
 from ..services.profile_service import ProfileService
+from .auth_tools import get_current_session_token
 
 
 def register_profile_tools(mcp: FastMCP, profile_service: ProfileService):

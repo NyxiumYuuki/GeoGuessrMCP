@@ -8,9 +8,9 @@ where each API key can have its own GeoGuessr session.
 import asyncio
 import logging
 
+from ..config import settings
 from .session import SessionManager, UserSession
 from .user_context import UserContext
-from ..config import settings
 
 logger = logging.getLogger(__name__)
 

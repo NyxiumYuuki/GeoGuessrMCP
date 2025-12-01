@@ -21,7 +21,7 @@ class GameService:
     async def get_game_details(
         self,
         game_token: str,
-            session_token: str | None = None,
+        session_token: str | None = None,
     ) -> tuple[Game, DynamicResponse]:
         """
         Get details for a specific game.
@@ -44,7 +44,7 @@ class GameService:
 
     async def get_unfinished_games(
         self,
-            session_token: str | None = None,
+        session_token: str | None = None,
     ) -> DynamicResponse:
         """Get list of unfinished games."""
         return await self.client.get(Endpoints.GAMES.GET_UNFINISHED_GAMES, session_token)
@@ -52,7 +52,7 @@ class GameService:
     async def get_streak_game(
         self,
         game_token: str,
-            session_token: str | None = None,
+        session_token: str | None = None,
     ) -> DynamicResponse:
         """Get streak game details."""
         endpoint = Endpoints.GAMES.get_streak_game(game_token)
@@ -62,7 +62,7 @@ class GameService:
         self,
         count: int = 10,
         page: int = 0,
-            session_token: str | None = None,
+        session_token: str | None = None,
     ) -> DynamicResponse:
         """
         Get the activity feed.
@@ -81,7 +81,7 @@ class GameService:
     async def get_recent_games(
         self,
         count: int = 10,
-            session_token: str | None = None,
+        session_token: str | None = None,
     ) -> list[Game]:
         """
         Get recent games from the activity feed.
@@ -121,7 +121,7 @@ class GameService:
 
     async def get_season_stats(
         self,
-            session_token: str | None = None,
+        session_token: str | None = None,
     ) -> tuple[SeasonStats, DynamicResponse]:
         """Get active season statistics."""
         response = await self.client.get(
@@ -137,7 +137,7 @@ class GameService:
     async def get_daily_challenge(
         self,
         day: str = "today",
-            session_token: str | None = None,
+        session_token: str | None = None,
     ) -> tuple[DailyChallenge, DynamicResponse]:
         """
         Get daily challenge.
@@ -161,7 +161,7 @@ class GameService:
     async def get_battle_royale(
         self,
         game_id: str,
-            session_token: str | None = None,
+        session_token: str | None = None,
     ) -> DynamicResponse:
         """Get battle royale game details."""
         endpoint = Endpoints.GAME_SERVER.get_battle_royale(game_id)
@@ -170,7 +170,7 @@ class GameService:
     async def get_duel(
         self,
         duel_id: str,
-            session_token: str | None = None,
+        session_token: str | None = None,
     ) -> DynamicResponse:
         """Get duel game details."""
         endpoint = Endpoints.GAME_SERVER.get_duel(duel_id)
@@ -178,7 +178,7 @@ class GameService:
 
     async def get_tournaments(
         self,
-            session_token: str | None = None,
+        session_token: str | None = None,
     ) -> DynamicResponse:
         """Get tournament information."""
         return await self.client.get(Endpoints.GAME_SERVER.GET_TOURNAMENTS, session_token)

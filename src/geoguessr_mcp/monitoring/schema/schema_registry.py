@@ -17,9 +17,9 @@ from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 
+from ...config import settings
 from .endpoint_schema import EndpointSchema
 from .schema_detector import SchemaDetector
-from ...config import settings
 
 logger = logging.getLogger(__name__)
 

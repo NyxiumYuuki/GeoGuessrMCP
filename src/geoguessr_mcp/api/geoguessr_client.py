@@ -13,12 +13,12 @@ import logging
 
 import httpx
 
-from .dynamic_response import DynamicResponse
-from .endpoints import EndpointInfo
 from ..auth import get_current_user_context
 from ..auth.session import SessionManager
 from ..config import settings
 from ..monitoring.schema.schema_registry import schema_registry
+from .dynamic_response import DynamicResponse
+from .endpoints import EndpointInfo
 
 logger = logging.getLogger(__name__)
 
@@ -44,7 +44,7 @@ class GeoGuessrClient:
 
     async def _get_authenticated_client(
         self,
-            session_token: str | None = None,
+        session_token: str | None = None,
     ) -> httpx.AsyncClient:
         """
         Get an authenticated HTTP client.
@@ -78,9 +78,9 @@ class GeoGuessrClient:
     async def request(
         self,
         endpoint: EndpointInfo,
-            session_token: str | None = None,
-            params: dict | None = None,
-            json_data: dict | None = None,
+        session_token: str | None = None,
+        params: dict | None = None,
+        json_data: dict | None = None,
         **kwargs,
     ) -> DynamicResponse:
         """
@@ -153,8 +153,8 @@ class GeoGuessrClient:
     async def get(
         self,
         endpoint: EndpointInfo,
-            session_token: str | None = None,
-            params: dict | None = None,
+        session_token: str | None = None,
+        params: dict | None = None,
         **kwargs,
     ) -> DynamicResponse:
         """Make a GET request."""
@@ -163,8 +163,8 @@ class GeoGuessrClient:
     async def post(
         self,
         endpoint: EndpointInfo,
-            session_token: str | None = None,
-            json_data: dict | None = None,
+        session_token: str | None = None,
+        json_data: dict | None = None,
         **kwargs,
     ) -> DynamicResponse:
         """Make a POST request."""
@@ -173,9 +173,9 @@ class GeoGuessrClient:
     async def get_raw(
         self,
         path: str,
-            session_token: str | None = None,
+        session_token: str | None = None,
         use_game_server: bool = False,
-            params: dict | None = None,
+        params: dict | None = None,
     ) -> DynamicResponse:
         """
         Make a raw GET request to any path.

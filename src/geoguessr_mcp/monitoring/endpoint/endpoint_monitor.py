@@ -18,10 +18,10 @@ from datetime import UTC, datetime
 
 import httpx
 
+from ...config import settings
+from ..schema.schema_registry import SchemaRegistry, schema_registry
 from .endpoint_definition import EndpointDefinition
 from .endpoint_monitoring_result import MonitoringResult
-from ..schema.schema_registry import SchemaRegistry, schema_registry
-from ...config import settings
 
 logger = logging.getLogger(__name__)
 
@@ -119,8 +119,8 @@ class EndpointMonitor:
 
     def __init__(
         self,
-            registry: SchemaRegistry | None = None,
-            ncfa_cookie: str | None = None,
+        registry: SchemaRegistry | None = None,
+        ncfa_cookie: str | None = None,
     ):
         self.registry = registry or schema_registry
         self.ncfa_cookie = ncfa_cookie or settings.DEFAULT_NCFA_COOKIE
